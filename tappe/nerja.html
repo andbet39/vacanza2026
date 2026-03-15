@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Nerja — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #06B6D4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorni 9–10</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #1E3A8A, #0284C7, #7DD3FC)">
+    <span class="page-hero-cat">Mare</span>
+    <span class="page-hero-emoji">🏄</span>
+    <div class="page-hero-day">Giorni 9–10</div>
+    <h1 class="page-hero-name">Nerja</h1>
+    <p class="page-hero-brief">Scogliere sul Mediterraneo, grotte millenarie e il villaggio più bello di Spagna</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Gioiello nascosto della Costa del Sol tra scogliere e pueblos blancos</div>
+    <div class="overview-text">
+      <p>Nerja è il gioiello nascosto della Costa del Sol — un'affascinante cittadina di case bianche arroccata su scogliere a picco sul Mediterraneo, miracolosamente risparmiata dallo sviluppo edilizio sfrenato che ha trasformato le vicine Málaga e Torremolinos. Qui l'atmosfera è ancora autentica, i ritmi sono quelli di un borgo marinaro andaluso.</p>
+      <p>Il Balcón de Europa, una passeggiata fiancheggiata da palme che si protende sul mare dal centro storico, è uno dei belvedere più romantici di tutta la Spagna. Sotto le scogliere, una serie di piccole calette con acqua cristallina offre alcune delle migliori possibilità di nuoto e snorkeling della costa. La vicina Playa de Maro, incastonata in un'area naturale protetta con imponenti scogliere calcaree, è costantemente classificata tra le migliori spiagge dell'Andalusia.</p>
+      <p>La Cueva de Nerja, scoperta nel 1959, è uno dei sistemi di grotte più impressionanti della Spagna — contiene la stalattite più grande conosciuta al mondo e pitture rupestri antiche di 42.000 anni. Le sale interne sono di dimensioni cattedralesche, con formazioni calcaree di straordinaria bellezza.</p>
+      <p>A soli 6 km nell'entroterra, il pueblo blanco di Frigiliana — con il suo quartiere moresco, i balconi fioriti e le stradine acciottolate — è stato votato più volte come il villaggio più bello di Spagna. Una tappa imperdibile per chiunque visiti la zona, dove il tempo sembra essersi fermato.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni principali di Nerja e dintorni</div>
+
+    <div class="card">
+      <div class="card-title">🌅 Balcón de Europa</div>
+      <div class="card-text">Iconica passeggiata a strapiombo sul mare con vista a 360° sul Mediterraneo. Caffetterie, musicisti di strada e un'atmosfera romantica unica. Costruito sul sito di un'antica fortezza. Il momento migliore è al tramonto, quando il cielo si tinge di rosa e arancio sopra il mare.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🌅 Imperdibile al tramonto</span>
+        <span class="card-meta-item">☕ Caffetterie panoramiche</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Playa de Maro</div>
+      <div class="card-text">Spiaggia protetta nell'area naturale degli Acantilados de Maro-Cerro Gordo. Scogliere calcaree imponenti, una cascata stagionale e acqua color smeraldo. Uno dei tratti di costa più belli dell'intera Andalusia. In estate arrivare molto presto per trovare parcheggio.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🅿️ Parcheggio ~4€</span>
+        <span class="card-meta-item">🌅 Arrivare presto</span>
+        <span class="card-meta-item">💎 Acqua cristallina</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛶 Kayak nelle Grotte Marine</div>
+      <div class="card-text">Tour guidati in kayak dalla spiaggia di Maro lungo le scogliere, visitando grotte marine e calette nascoste accessibili solo dall'acqua. Un'esperienza indimenticabile che permette di scoprire la costa da una prospettiva unica. Prenotare con anticipo, soprattutto in estate.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 15–25€ a persona</span>
+        <span class="card-meta-item">⏱ 1.5–2h</span>
+        <span class="card-meta-item">📅 Prenotare in anticipo</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦇 Cueva de Nerja</div>
+      <div class="card-text">Spettacolare sistema di grotte con sale di dimensioni cattedralesche, stalattiti e stalagmiti monumentali. Ospita pitture rupestri antiche di 42.000 anni (non sempre visibili al pubblico). La sala principale è utilizzata anche per concerti e spettacoli, grazie all'acustica naturale eccezionale.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 9:30–16:30 (inv) / 9:30–19:00 (est)</span>
+        <span class="card-meta-item">💰 ~12€ adulti</span>
+        <span class="card-meta-item">📅 Prenotare online</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏘 Frigiliana</div>
+      <div class="card-text">Incantevole pueblo blanco moresco a 6 km nell'entroterra. Stradine acciottolate strette, case imbiancate a calce con balconi traboccanti di fiori, botteghe artigianali e vino artigianale. Votato più volte come il villaggio più bello di Spagna. Perdersi tra i vicoli è puro piacere.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🚗 6 km da Nerja</span>
+        <span class="card-meta-item">🏆 Villaggio più bello</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏞 Río Chillar</div>
+      <div class="card-text">Passeggiata fluviale attraverso una gola stretta con acqua fino al ginocchio. Percorso di circa 8 km andata e ritorno. Molto popolare in estate per il suo effetto rinfrescante. L'acqua cristallina scorre tra pareti di roccia sempre più strette, creando un'atmosfera magica.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🥾 ~8 km A/R</span>
+        <span class="card-meta-item">👟 Scarpe da acqua</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Orari</div>
+        <div class="card-text">Cueva de Nerja: 9:30–16:30 (inverno) / 9:30–19:00 (estate). Ingresso ~12€. Prenotare online su cuevadenerja.es per evitare code, soprattutto in alta stagione.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come Arrivare</div>
+        <div class="card-text">A-7 da Málaga (~50 min) o da Almería (~1h40). Uscita Nerja. Strade in buone condizioni e ben segnalate. Da Frigiliana strada panoramica di 6 km.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Centro Nerja: parcheggio coperto sotto il Balcón de Europa (~2€/h). Playa de Maro: parcheggio limitato (~4€ in estate), arrivare presto. Area camper dedicata fuori dal centro.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">Mite tutto l'anno. Estate 28–34°C, temperatura acqua 22–25°C. Inverno 14–18°C, ancora piacevole. Piogge rare. Ideale in qualsiasi stagione.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Aree di sosta e campeggi nella zona</div>
+
+    <div class="card">
+      <div class="card-title">📍 Area Autocaravanas Nerja</div>
+      <div class="card-text">Area sosta attrezzata con acqua, scarico ed elettricità. A circa 1 km dal centro di Nerja, raggiungibile a piedi con una piacevole passeggiata. Posizione comoda per esplorare la città e le spiagge circostanti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 12–15€/notte</span>
+        <span class="card-meta-item">💧 Acqua</span>
+        <span class="card-meta-item">🔌 Elettricità</span>
+        <span class="card-meta-item">🚿 Scarico</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping Nerja</div>
+      <div class="card-text">Campeggio completo con piscina, bagni, ristorante e servizio navetta per il centro di Nerja. Piazzole ombreggiate con tutti i comfort. Ottima base per una sosta di due giorni nella zona, con possibilità di rilassarsi in piscina dopo le escursioni.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 30–40€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🚌 Navetta centro</span>
+        <span class="card-meta-item">🍽 Ristorante</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parking Maro</div>
+      <div class="card-text">Area tollerata per una notte vicino alla spiaggia di Maro. Comodo per chi vuole godersi la spiaggia al mattino presto, prima dell'arrivo della folla. In estate potrebbe essere a pagamento (~4€).</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito / ~4€ estate</span>
+        <span class="card-meta-item">🏖 Vicino alla spiaggia</span>
+        <span class="card-meta-item">⚠️ Tollerato 1 notte</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Area Autocaravanas Torrox</div>
+      <div class="card-text">A 10 minuti da Nerja, area attrezzata con servizi completi: acqua, scarico, elettricità. Alternativa valida se l'area di Nerja è piena. Torrox è nota per avere il miglior clima d'Europa, con oltre 320 giorni di sole all'anno.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~10€/notte</span>
+        <span class="card-meta-item">💧 Servizi completi</span>
+        <span class="card-meta-item">🚗 10 min da Nerja</span>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <span class="tip-text">Nerja merita almeno due giorni: uno per il centro, il Balcón de Europa e Frigiliana, e uno per Playa de Maro, il kayak nelle grotte e la Cueva de Nerja. Il Río Chillar è perfetto per le giornate più calde.</span>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la tappa</div>
+
+    <a class="link-item" href="https://www.nerja.es" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏖</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Nerja</div>
+        <div class="link-item-url">nerja.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.cuevadenerja.es" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🦇</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Cueva de Nerja</div>
+        <div class="link-item-url">cuevadenerja.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.educareaventura.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🛶</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Kayak Maro (Educare Aventura)</div>
+        <div class="link-item-url">educareaventura.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.frigiliana.es" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏘</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Frigiliana Turismo</div>
+        <div class="link-item-url">frigiliana.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=36.74&lng=-3.88" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Nerja</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Nerja,+Málaga,+Spain" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Nerja</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="tabernas.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🏜 Desierto de Tabernas — Giorno 8</span>
+    </a>
+    <a class="next" href="caminito.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🥾 Caminito del Rey — Giorno 11</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Nerja
+  </div>
+
+  <script>
+    var map = L.map('detail-map', { scrollWheelZoom: false }).setView([36.7440, -3.8769], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+    L.marker([36.7440, -3.8769]).addTo(map)
+      .bindPopup('<strong>🏄 Nerja</strong><br>Giorni 9–10 — Mare')
+      .openPopup();
+  </script>
+
+</body>
+</html>

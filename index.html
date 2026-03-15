@@ -72,21 +72,18 @@
     ======================== */
     .hero {
       position: relative;
-      height: 100svh;
-      min-height: 580px;
-      max-height: 860px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+      width: 100%;
       overflow: hidden;
     }
     .hero-bg {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(165deg,
-        #0C4A6E 0%, #0891B2 25%,
-        #0D9488 50%, #22C55E 70%,
-        #F59E0B 90%, #DC2626 100%);
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .hero-bg img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
     .hero-sun {
       position: absolute;
@@ -500,6 +497,9 @@
     .tip-ico  { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
     .tip-text { font-size: 13px; line-height: 1.55; font-weight: 500; }
 
+    .card-actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
     .maps-btn {
       display: inline-flex; align-items: center; gap: 7px;
       padding: 10px 18px;
@@ -510,6 +510,16 @@
       transition: background .2s;
     }
     .maps-btn:active { background: var(--bg); }
+    .detail-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px;
+      border-radius: var(--r-full);
+      font-size: 13px; font-weight: 700;
+      color: white;
+      transition: transform .15s, opacity .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .detail-btn:active { transform: scale(.97); opacity: .9; }
 
     /* ========================
        MAP SECTION
@@ -630,57 +640,10 @@
      HERO
 ======================== -->
 <section class="hero" id="home">
-  <div class="hero-bg"></div>
-  <div class="hero-sun"></div>
-
-  <!-- Mountain silhouettes -->
-  <svg class="hero-mountains" viewBox="0 0 375 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    <path d="M0,130 L0,55 L45,25 L85,48 L125,18 L168,42 L205,12 L248,38 L285,22 L325,48 L375,28 L375,130 Z" fill="rgba(0,0,0,.18)"/>
-    <path d="M0,130 L0,78 L55,52 L95,68 L135,44 L175,62 L215,48 L258,66 L295,52 L340,72 L375,58 L375,130 Z" fill="rgba(0,0,0,.22)"/>
-    <path d="M0,130 L0,100 L60,85 L110,95 L160,80 L210,92 L260,82 L310,96 L375,88 L375,130 Z" fill="rgba(0,0,0,.28)"/>
-  </svg>
-
-  <!-- Camper SVG illustration -->
-  <svg class="hero-camper" viewBox="0 0 130 72" xmlns="http://www.w3.org/2000/svg">
-    <!-- Main body -->
-    <rect x="4" y="18" width="115" height="42" rx="7" fill="white" opacity=".92"/>
-    <!-- Cab section -->
-    <path d="M88,18 L115,18 L122,28 L122,46 L88,46 Z" fill="white" opacity=".92" rx="5"/>
-    <!-- Windows body -->
-    <rect x="12" y="25" width="22" height="14" rx="3" fill="#BAE6FD" opacity=".85"/>
-    <rect x="42" y="25" width="22" height="14" rx="3" fill="#BAE6FD" opacity=".85"/>
-    <rect x="68" y="25" width="16" height="14" rx="3" fill="#BAE6FD" opacity=".85"/>
-    <!-- Cab window -->
-    <path d="M92,20 L116,20 L120,28 L92,28 Z" fill="#BAE6FD" opacity=".85"/>
-    <!-- Door -->
-    <rect x="74" y="26" width="12" height="20" rx="2" fill="rgba(0,0,0,.08)"/>
-    <circle cx="84" cy="36" r="1.5" fill="rgba(0,0,0,.2)"/>
-    <!-- Stripe -->
-    <rect x="4" y="38" width="115" height="5" fill="#06B6D4" opacity=".75" rx="1"/>
-    <!-- Wheels -->
-    <circle cx="32" cy="62" r="10" fill="#334155"/>
-    <circle cx="32" cy="62" r="5"  fill="#94A3B8"/>
-    <circle cx="95" cy="62" r="10" fill="#334155"/>
-    <circle cx="95" cy="62" r="5"  fill="#94A3B8"/>
-    <!-- Solar panel on roof -->
-    <rect x="20" y="12" width="30" height="8" rx="2" fill="#60A5FA" opacity=".7"/>
-    <line x1="35" y1="12" x2="35" y2="20" stroke="white" stroke-width=".8" opacity=".5"/>
-    <!-- Antenna -->
-    <line x1="116" y1="10" x2="116" y2="3" stroke="white" stroke-width="1.8" opacity=".7"/>
-    <circle cx="116" cy="3" r="2" fill="#F59E0B"/>
-    <!-- Stars around camper -->
-    <text x="4" y="10" font-size="8" opacity=".6">✦</text>
-    <text x="125" y="16" font-size="6" opacity=".5">✦</text>
-  </svg>
-
-  <!-- Waves -->
-  <svg class="hero-waves" viewBox="0 0 375 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    <path d="M0,80 Q94,50 188,80 Q282,110 375,80 L375,160 L0,160 Z" fill="rgba(255,255,255,.05)"/>
-    <path d="M0,110 Q94,80 188,110 Q282,140 375,110 L375,160 L0,160 Z" fill="rgba(255,255,255,.05)"/>
-  </svg>
-
+  <div class="hero-bg">
+    <img src="651f3604-d82f-41cb-8d2d-cc591de2c2a6.jpeg" alt="Sud della Spagna">
+  </div>
   <div class="hero-overlay"></div>
-
   <div class="hero-content">
     <div class="hero-badge">🚐 Road Trip · 15 Giorni in Camper</div>
     <h1 class="hero-title">Sud della<br>Spagna</h1>
@@ -1059,11 +1022,18 @@ function renderTimeline(filter = 'all') {
               <span class="tip-ico">💡</span>
               <span class="tip-text">${stop.tip}</span>
             </div>
-            <a href="https://maps.google.com/?q=${encodeURIComponent(stop.maps)}"
-               target="_blank" rel="noopener noreferrer"
-               class="maps-btn">
-              🗺 Apri in Maps
-            </a>
+            <div class="card-actions">
+              <a href="https://maps.google.com/?q=${encodeURIComponent(stop.maps)}"
+                 target="_blank" rel="noopener noreferrer"
+                 class="maps-btn" onclick="event.stopPropagation()">
+                🗺 Apri in Maps
+              </a>
+              <a href="tappe/${stop.id}.html"
+                 class="detail-btn" style="background:${stop.color}"
+                 onclick="event.stopPropagation()">
+                📖 Scopri di più →
+              </a>
+            </div>
           </div>
         </div>
       </div>`;
@@ -1087,7 +1057,7 @@ function renderTimeline(filter = 'all') {
 function attachCardEvents() {
   document.querySelectorAll('.tl-card').forEach(card => {
     card.addEventListener('click', function (e) {
-      if (e.target.closest('.maps-btn')) return;
+      if (e.target.closest('.maps-btn') || e.target.closest('.detail-btn')) return;
       const wasOpen = this.classList.contains('open');
       document.querySelectorAll('.tl-card.open').forEach(c => c.classList.remove('open'));
       if (!wasOpen) {

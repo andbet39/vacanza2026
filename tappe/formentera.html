@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Formentera — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #06B6D4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 4</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(160deg, #0E7490, #06B6D4, #67E8F9)">
+    <span class="page-hero-cat">Mare</span>
+    <span class="page-hero-emoji">🚲</span>
+    <div class="page-hero-day">Giorno 4</div>
+    <h1 class="page-hero-name">Formentera</h1>
+    <p class="page-hero-brief">L'ultimo paradiso del Mediterraneo, da esplorare in bicicletta</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">La più piccola e selvaggia delle Baleari</div>
+    <div class="overview-text">
+      <p>Formentera è la più piccola delle isole Baleari principali e un vero paradiso mediterraneo. Spesso definita "l'ultimo paradiso del Mediterraneo", è celebre per le sue acque turchesi impossibilmente cristalline e le spiagge di sabbia bianca che rivaleggiano con i Caraibi. L'isola è lunga appena 20 km e può essere esplorata interamente in bicicletta in una giornata.</p>
+      <p>Ses Illetes, una sottile striscia di sabbia bianca tra due mari, è regolarmente votata tra le migliori spiagge del mondo. Qui l'acqua è così trasparente che le barche sembrano sospese nel vuoto, e i fondali di posidonia creano giochi di luce ipnotici tra il turchese e lo smeraldo. La penisola si assottiglia fino a quasi scomparire, con il mare su entrambi i lati a pochi passi di distanza.</p>
+      <p>L'isola ha un'atmosfera bohémien e di vita lenta — niente grattacieli, niente turismo di massa, solo pinete profumate, saline con acque rosa, muretti a secco e pochi fari sparsi lungo la costa. È il tipo di luogo dove il tempo si ferma e la semplicità diventa lusso.</p>
+      <p>La strada romana Camí de Sa Pujada e il Far de la Mola, il faro all'estremità orientale dell'isola, ispirarono Jules Verne durante un suo viaggio. Dalla scogliera alta 120 metri su cui sorge il faro, la vista spazia sull'infinito del Mediterraneo, ed è qui che si ammira uno dei tramonti più belli di tutte le Baleari.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le meraviglie di Formentera</div>
+
+    <div class="card">
+      <div class="card-title">🏖 Ses Illetes</div>
+      <div class="card-text">Penisola di sabbia bianca con acqua turchese poco profonda su entrambi i lati. Le piccole isole al largo (da cui prende il nome) completano un paesaggio da cartolina. Votata più volte miglior spiaggia d'Europa. Arrivare la mattina presto per trovare posto.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🅿️ Parcheggio ~6€</span>
+        <span class="card-meta-item">🏆 Top spiaggia Europa</span>
+        <span class="card-meta-item">⚠️ Arrivare presto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Playa de Llevant</div>
+      <div class="card-text">Lunga spiaggia di sabbia sul lato est della penisola di Ses Illetes. Meno affollata del versante ovest, più naturale e selvaggia. Il vento da est la rende talvolta mossa, ma l'acqua è altrettanto cristallina. Ideale per chi cerca tranquillità.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏖 Sabbia fine</span>
+        <span class="card-meta-item">🌬 Più ventosa</span>
+        <span class="card-meta-item">👥 Meno affollata</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏠 Far de la Mola</div>
+      <div class="card-text">Faro all'estremità orientale dell'isola, su una scogliera a 120 metri sul mare. Viste spettacolari, soprattutto al tramonto. Una targa ricorda Jules Verne, che si ispirò a questo luogo. La strada per raggiungerlo attraversa un altopiano di campagna con fichi e vigneti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📏 120m sul mare</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🌅 Tramonto spettacolare</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛵ Es Caló de Sant Agustí</div>
+      <div class="card-text">Pittoresco villaggio di pescatori con i tradizionali ricoveri per barche scavati nella roccia. Le casette colorate e le reti da pesca creano un'atmosfera autentica e fuori dal tempo. Ottimi ristoranti di pesce fresco con vista sulla piccola baia.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🐟 Pesce fresco</span>
+        <span class="card-meta-item">📸 Molto fotogenico</span>
+        <span class="card-meta-item">🍽 Ristoranti</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦩 Saline di Formentera</div>
+      <div class="card-text">Stagni salmastri con acque color rosa, parte del Parco Naturale di Ses Salines che collega Ibiza e Formentera. Le saline sono attive da secoli e in autunno attirano colonie di fenicotteri. Un paesaggio surreale di acqua, sale e luce.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🦩 Fenicotteri in autunno</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📸 Acque rosa</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Cala Saona</div>
+      <div class="card-text">Piccola cala sulla costa occidentale con acqua turchese e pareti rocciose color ocra. Uno dei posti migliori per il tramonto a Formentera. Beach bar disponibile per un aperitivo con vista. Facilmente raggiungibile in bici da Sant Francesc.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🌅 Tramonto</span>
+        <span class="card-meta-item">🍹 Beach bar</span>
+        <span class="card-meta-item">🚲 Facile in bici</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Come organizzare la giornata a Formentera</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">⛴ Come Arrivare</div>
+        <div class="card-text">Solo in traghetto da Ibiza (porto di La Savina). Trasmapi o Baleària, 35 minuti, partenze ogni 30–60 minuti. Circa 20–40€ A/R per persona. Il camper NON va portato: prenotazione mesi prima e costo altissimo.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚲 Girare l'Isola</div>
+        <div class="card-text">Noleggiare bici (10–15€/giorno) o scooter (25–40€/giorno) a La Savina appena sbarcati. L'isola è pianeggiante, ideale per le biciclette. 20 km di lunghezza, fattibili in giornata con soste alle spiagge.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Costi</div>
+        <div class="card-text">Parcheggio Ses Illetes ~6€. Acqua e cibo sensibilmente più cari che sulla terraferma. Portare acqua e snack da Ibiza per risparmiare. Ristoranti: budget 15–25€ a pasto.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">Ventoso, portare sempre protezione solare alta. L'acqua è cristallina con temperatura di 22–26°C in estate. Il vento da nord (tramontana) può rendere alcune spiagge del nord più fresche. Portare un k-way leggero.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Nota: il camper resta a Ibiza!</div>
+
+    <div class="tip-box">
+      <span class="tip-ico">🚐</span>
+      <span class="tip-text"><strong>Il camper resta a Ibiza!</strong> Formentera è una gita giornaliera. Portare il camper in traghetto è sconsigliato (prenotazione mesi prima, costo elevatissimo e strade strette). Parcheggiare a Ibiza e prendere il primo traghetto del mattino.</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Porto Ibiza (Botafoc)</div>
+      <div class="card-text">Parcheggio vicino al porto di Ibiza, comodo per lasciare il camper e imbarcarsi per Formentera con il primo traghetto della mattina (7:00–8:30). Zona sorvegliata, a pagamento.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 A pagamento</span>
+        <span class="card-meta-item">🔒 Sorvegliato</span>
+        <span class="card-meta-item">⛴ Vicino imbarco</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping La Playa (alternativa)</div>
+      <div class="card-text">Se si soggiorna al Camping La Playa a Cala Nova, si può lasciare il camper in piazzola e raggiungere il porto di Ibiza in bus o taxi (circa 20 minuti). Il campeggio custodisce il mezzo durante l'assenza.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏕 Piazzola sicura</span>
+        <span class="card-meta-item">🚌 Bus per porto</span>
+        <span class="card-meta-item">⏱ 20 min dal porto</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per la gita a Formentera</div>
+
+    <a class="link-item" href="https://www.formentera.es" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏝</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Formentera</div>
+        <div class="link-item-url">formentera.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.trasmapi.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">⛴</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Trasmapi Traghetti</div>
+        <div class="link-item-url">trasmapi.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.balearia.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🚢</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Baleària (Ibiza-Formentera)</div>
+        <div class="link-item-url">balearia.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=38.91&lng=1.44" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Ibiza Porto</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Formentera,+Spain" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Formentera</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a class="prev" href="ibiza.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🏝 Ibiza — Giorni 2–3</span>
+    </a>
+    <a class="next" href="transfer.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🚐 Dénia → Andalusia — Giorno 5</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Formentera
+  </div>
+
+  <script>
+    var map = L.map('detail-map').setView([38.7338, 1.4515], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([38.7338, 1.4515]).addTo(map)
+      .bindPopup('<strong>🚲 Formentera</strong><br>Giorno 4 — Mare')
+      .openPopup();
+  </script>
+
+</body>
+</html>

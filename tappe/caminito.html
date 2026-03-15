@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Caminito del Rey — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2; --cyan: #06B6D4; --green: #22C55E; --amber: #F59E0B;
+      --pink: #EC4899; --purple: #6366F1; --bg: #FFF7ED; --bg-card: #FFFFFF;
+      --text: #1E293B; --text-muted: #64748B; --text-light: #94A3B8; --border: #E2E8F0;
+      --tip-bg: #FFFBEB; --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07); --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px; --r-sm: 10px; --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #22C55E;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 11</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #14532D, #16A34A, #86EFAC)">
+    <span class="page-hero-cat">Natura</span>
+    <span class="page-hero-emoji">🧗</span>
+    <div class="page-hero-day">Giorno 11</div>
+    <h1 class="page-hero-name">Caminito del Rey</h1>
+    <p class="page-hero-brief">La passerella vertiginosa nelle gole del Guadalhorce</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Una delle esperienze escursionistiche più emozionanti d'Europa</div>
+    <div class="overview-text">
+      <p>Il Caminito del Rey (il "sentierino del Re") è una delle esperienze escursionistiche più emozionanti d'Europa. Questa passerella è agganciata alle pareti verticali del Desfiladero de los Gaitanes, dove il fiume Guadalhorce ha scavato un canyon profondo fino a 700 metri attraverso le montagne calcaree della provincia di Malaga.</p>
+      <p>Costruito originariamente nel 1905 per consentire agli operai di raggiungere due centrali idroelettriche, il sentiero cadde in rovina e divenne famoso come "il percorso più pericoloso del mondo" — diverse persone persero la vita tentando di attraversarlo prima della chiusura nel 2000. Dopo un restauro massiccio da 5,5 milioni di euro, ha riaperto nel 2015 come un percorso sicuro ma ancora da brivido, con sezioni dal pavimento in vetro, ponti sospesi e panorami mozzafiato.</p>
+      <p>Il percorso lineare di 7,7 km attraversa tre gole (Gaitanejo, Gaitanes e Hoyo), passando per tunnel scavati nella roccia e culminando in uno spettacolare ponte sospeso. I 2,9 km di passerelle sono agganciati direttamente alla parete rocciosa a oltre 100 metri di altezza dal fondo della gola.</p>
+      <p>L'area circostante di El Chorro è anche molto popolare per l'arrampicata sportiva e i laghi vicini (Embalse del Conde de Guadalhorce) offrono possibilità di nuoto e kayak in acque turchesi circondate da montagne.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni principali del Caminito del Rey e dintorni</div>
+
+    <div class="card">
+      <div class="card-title">🧗 Caminito del Rey (percorso completo)</div>
+      <div class="card-text">Percorso lineare di 7,7 km di cui 2,9 km di passerelle agganciate alla parete rocciosa, il resto su sentieri forestali. La durata è di circa 3-4 ore. La capacità massima è di 400 persone per fascia oraria. Il punto culminante è lo spettacolare ponte sospeso finale che attraversa la gola. La prenotazione è obbligatoria e i posti si esauriscono 2-4 settimane prima in alta stagione.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 9:30–17:00</span>
+        <span class="card-meta-item">💰 ~10€ + 1.55€ bus</span>
+        <span class="card-meta-item">⏱ 3–4 ore</span>
+        <span class="card-meta-item">🎫 Prenotazione obbligatoria</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏞 Desfiladero de los Gaitanes</div>
+      <div class="card-text">La gola stessa è uno spettacolo naturale imponente: profonda fino a 700 metri e larga appena 10 metri nei punti più stretti. Le pareti calcaree verticali creano un paesaggio drammatico e maestoso, habitat di avvoltoi grifoni e altre specie rupicole.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📏 Profondità: fino a 700m</span>
+        <span class="card-meta-item">💰 Incluso nel percorso</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💧 Embalse del Conde de Guadalhorce</div>
+      <div class="card-text">Lago artificiale vicino a El Chorro con acque turchesi spettacolari. Perfetto per nuoto, kayak e picnic. L'area intorno al lago offre diverse spiagge d'acqua dolce e zone attrezzate per il relax. Accesso libero e gratuito.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏊 Nuoto e kayak</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🅿️ Parcheggio disponibile</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏘 El Chorro</div>
+      <div class="card-text">Piccolo villaggio ai piedi delle gole, diventato una mecca dell'arrampicata sportiva a livello internazionale. Atmosfera molto autentica e rilassata, con piccoli bar e ostelli frequentati da scalatori di tutto il mondo. Ottimo punto base per esplorare la zona.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🧗 Arrampicata sportiva</span>
+        <span class="card-meta-item">🍺 Bar e ostelli</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦅 Mirador de las Buitreras</div>
+      <div class="card-text">Punto panoramico eccellente per osservare gli avvoltoi grifoni che nidificano nelle pareti della gola. Con un binocolo è possibile avvistare anche aquile reali e falchi pellegrini. Particolarmente suggestivo al mattino presto e nel tardo pomeriggio.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🔭 Binocolo consigliato</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Orari e prenotazione</div>
+        <div class="card-text">Aperto tutto l'anno (chiuso il lunedì in inverno). Orari: 9:30-17:00 (ultimo accesso 15:00 in inverno, 17:00 in estate). La prenotazione è obbligatoria sul sito caminitodelrey.info. I posti si esauriscono 2-4 settimane prima in alta stagione. Costo: ~10€ + ~1,55€ per il bus navetta.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come arrivare</div>
+        <div class="card-text">Da Nerja via A-7 e A-357 (~1h15). Da Málaga via A-357 (~45 min). Il percorso è lineare (punto A → punto B): un bus navetta collega l'arrivo al punto di partenza.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Parcheggio gratuito all'ingresso nord (El Kiosco) o all'ingresso sud (El Chorro). Il bus navetta tra i due punti costa ~1,55€. Arrivare presto in alta stagione.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">La gola offre un po' d'ombra ma può fare molto caldo in estate. Il periodo migliore è marzo-giugno e settembre-novembre. In caso di pioggia le visite vengono cancellate (con rimborso del biglietto).</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">⚠️</span>
+      <div class="tip-text">Scarpe chiuse obbligatorie (no sandali o infradito). Non adatto a chi soffre di vertigini severe. Età minima bambini: 8 anni. Il casco di protezione viene fornito gratuitamente all'ingresso.</div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare col Camper -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Campeggi e aree sosta nella zona</div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping El Chorro</div>
+      <div class="card-text">Piccolo campeggio vicino al villaggio di El Chorro, con un'atmosfera rilassata e internazionale grazie ai tanti scalatori. Dispone di bagni, docce calde e un piccolo bar.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~15-20€/notte</span>
+        <span class="card-meta-item">🚿 Bagni e docce</span>
+        <span class="card-meta-item">🍺 Bar</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Área de autocaravanas Ardales</div>
+      <div class="card-text">Area attrezzata per camper vicino al paese di Ardales, a circa 5 km dal Caminito. Servizi completi inclusi scarico acque, elettricità e acqua potabile.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~10€/notte</span>
+        <span class="card-meta-item">🔌 Servizi completi</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Caminito (El Kiosco)</div>
+      <div class="card-text">Parcheggio gratuito all'ingresso nord del Caminito. Il pernottamento è tollerato per una notte. Nessun servizio disponibile, ma posizione perfetta per la visita del mattino dopo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">⚠️ Nessun servizio</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping Valle Abdalajís</div>
+      <div class="card-text">Campeggio tranquillo a circa 20 minuti dal Caminito, con piscina e ampio spazio. Ambiente rilassato e familiare, ottima base per esplorare la zona.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~20-30€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la visita</div>
+
+    <a href="https://www.caminitodelrey.info" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🎫</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Prenotazione Caminito del Rey</div>
+        <div class="link-item-url">caminitodelrey.info</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.elchorro.com" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🧗</span>
+      <div class="link-item-text">
+        <div class="link-item-name">El Chorro Climbing</div>
+        <div class="link-item-url">elchorro.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.ardales.es" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏞</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Ardales</div>
+        <div class="link-item-url">ardales.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://park4night.com/it/search?lat=36.93&lng=-4.78" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night El Chorro</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://maps.google.com/?q=Caminito+del+Rey,+Spain" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Mappa -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione del Caminito del Rey</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="nerja.html">
+      <span class="prevnext-label">← Precedente</span>
+      <span class="prevnext-name">Nerja — Giorni 9-10</span>
+    </a>
+    <a href="torcal.html" class="next">
+      <span class="prevnext-label">Successivo →</span>
+      <span class="prevnext-name">El Torcal — Giorno 12</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🇪🇸 15 Giorni nel Sud della Spagna — Caminito del Rey
+  </div>
+
+  <script>
+    const map = L.map('detail-map', { scrollWheelZoom: false }).setView([36.9295, -4.7763], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([36.9295, -4.7763]).addTo(map).bindPopup('<strong>Caminito del Rey</strong><br>Desfiladero de los Gaitanes');
+  </script>
+
+</body>
+</html>

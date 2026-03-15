@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Ibiza — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #06B6D4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorni 2–3</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #164E63, #0891B2, #22D3EE)">
+    <span class="page-hero-cat">Mare</span>
+    <span class="page-hero-emoji">🏝</span>
+    <div class="page-hero-day">Giorni 2–3</div>
+    <h1 class="page-hero-name">Ibiza</h1>
+    <p class="page-hero-brief">Isola UNESCO tra acque cristalline, calette nascoste e storia millenaria</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Patrimonio UNESCO e paradiso mediterraneo</div>
+    <div class="overview-text">
+      <p>Ibiza è molto più della vita notturna per cui è famosa nel mondo — è un'isola Patrimonio dell'Umanità UNESCO con alcune delle spiagge più belle del Mediterraneo. L'isola ha una doppia personalità: da un lato la scena festaiola di San Antonio e Playa d'en Bossa, dall'altro la bellezza tranquilla della costa nord e delle cale nascoste tra i pini.</p>
+      <p>Dalt Vila, la città vecchia fortificata arroccata sulla collina sopra il porto, è Patrimonio dell'Umanità UNESCO con le sue mura rinascimentali, le stradine acciottolate tortuose e le viste panoramiche mozzafiato sul mare. Passeggiare al tramonto tra i bastioni è un'esperienza indimenticabile, con il sole che colora di arancione le antiche pietre e il blu intenso del Mediterraneo sullo sfondo.</p>
+      <p>Le acque cristalline dell'isola rivaleggiano con i Caraibi, specialmente a Cala Comte dove l'acqua sfuma tra tonalità di turchese, smeraldo e zaffiro in uno spettacolo naturale che sembra irreale. Ogni cala ha il suo carattere: dalle spiagge attrezzate con chiringuitos alle calette selvagge raggiungibili solo a piedi.</p>
+      <p>Es Vedrà, il misterioso isolotto roccioso visibile dalla costa sud-occidentale, è uno dei punti di riferimento naturali più magnetici del Mediterraneo. Alto 382 metri, questo scoglio solitario è avvolto da leggende e misticismo, e la sua sagoma al tramonto è diventata il simbolo stesso dell'isola.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni imperdibili di Ibiza</div>
+
+    <div class="card">
+      <div class="card-title">🏖 Cala Comte</div>
+      <div class="card-text">Probabilmente la spiaggia più bella di Ibiza. Acqua turchese a più livelli di profondità, piattaforme rocciose naturali per prendere il sole e vista spettacolare sulle isolette al tramonto. L'acqua è così trasparente che sembra di galleggiare nel vuoto.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🅿️ Parcheggio ~5€</span>
+        <span class="card-meta-item">🌅 Tramonto imperdibile</span>
+        <span class="card-meta-item">⚠️ Arrivare presto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Cala Bassa</div>
+      <div class="card-text">Spiaggia di sabbia adatta alle famiglie con beach club, sport acquatici e ristorante. Raggiungibile anche con la barca-shuttle da San Antonio, il che la rende una gita piacevole anche senza auto. Acqua calma e poco profonda vicino alla riva.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">👨‍👩‍👧 Famiglie</span>
+        <span class="card-meta-item">🚤 Shuttle da San Antonio</span>
+        <span class="card-meta-item">🏄 Sport acquatici</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🪨 Es Vedrà</div>
+      <div class="card-text">Isolotto roccioso di 382 metri che emerge dal mare al largo della costa sud-occidentale. Circondato da leggende e considerato un luogo di energia mistica. Il punto panoramico migliore si raggiunge con una breve escursione (30 min) alla Torre des Savinar.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🥾 Escursione 30 min</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📏 382m</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏰 Dalt Vila</div>
+      <div class="card-text">Città vecchia fortificata UNESCO. Le mura rinascimentali racchiudono un labirinto di vicoli, la cattedrale, il museo archeologico e piazzette panoramiche. Si entra dal Portal de Ses Taules, la porta principale con il ponte levatoio. La salita è ripida ma le viste ripagano ogni sforzo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏛 UNESCO</span>
+        <span class="card-meta-item">💰 Gratis (museo ~3€)</span>
+        <span class="card-meta-item">⏱ 1.5–2h</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Cala d'Hort</div>
+      <div class="card-text">Spiaggia con vista diretta su Es Vedrà, uno dei panorami più fotografati delle Baleari. Meno affollata della costa sud, con ottimi ristoranti di pesce sulla spiaggia. L'acqua è cristallina e la cornice naturale è spettacolare.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🍽 Ristoranti sulla spiaggia</span>
+        <span class="card-meta-item">👁 Vista Es Vedrà</span>
+        <span class="card-meta-item">🅿️ Limitato</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛍 Mercado Las Dalias</div>
+      <div class="card-text">Il leggendario mercato hippie di San Carlos, attivo ogni sabato mattina. Artigianato locale, vintage, gioielli fatti a mano, musica dal vivo e un'atmosfera bohémien che racconta lo spirito più autentico dell'isola. Un'istituzione dagli anni '80.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📅 Sabato mattina</span>
+        <span class="card-meta-item">💰 Ingresso gratuito</span>
+        <span class="card-meta-item">🎶 Musica live</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦩 Ses Salines Natural Park</div>
+      <div class="card-text">Parco naturale delle saline, area ecologica protetta con stagni salmastri, fenicotteri in autunno e spiagge incontaminate. Le saline sono attive da epoca fenicia e collegano idealmente Ibiza a Formentera attraverso il canale che le separa.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🦩 Fenicotteri</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🌿 Area protetta</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Consigli per muoversi sull'isola col camper</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🚢 Come Arrivare</div>
+        <div class="card-text">Traghetto Baleària da Dénia: notturno ~7h, fast ferry ~3.5h. Disponibili anche collegamenti da Valencia e Barcellona. Prenotare il passaggio camper con largo anticipo, soprattutto in estate.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Circolazione Camper</div>
+        <div class="card-text">Attenzione alle restrizioni estive: alcune strade verso le cale sono strette e possono vietare i camper oltre 6 metri. In luglio-agosto alcune spiagge chiudono l'accesso veicolare. Informarsi localmente.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Molto difficile in estate. Arrivare presto, prima delle 10:00. Cala Comte: parcheggio a 500m, ~5€. Dalt Vila: parcheggio sotto le mura, ~2€/h. Zone blu in centro e nelle aree turistiche.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">25–32°C in estate, sempre ventilato grazie alla brezza marina. Attenzione al sole forte, soprattutto tra 12 e 16. Portare sempre protezione solare alta e cappello. Acqua 24–27°C in estate.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Opzioni di sosta sull'isola</div>
+
+    <div class="tip-box">
+      <span class="tip-ico">⚠️</span>
+      <span class="tip-text">Ibiza ha pochissime opzioni per i camper. L'unico campeggio ufficiale è il Camping La Playa a Cala Nova. Il campeggio libero è vietato e sanzionato. Pianifica in anticipo!</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping La Playa (Cala Nova)</div>
+      <div class="card-text">L'unico campeggio ufficiale dell'isola, situato direttamente sulla spiaggia di Cala Nova sulla costa est. Offre piazzole con elettricità, bagni, docce, ristorante e accesso diretto alla spiaggia. Prenotazione obbligatoria in alta stagione.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 35–50€/notte (estate)</span>
+        <span class="card-meta-item">🔌 Elettricità</span>
+        <span class="card-meta-item">🏖 Sulla spiaggia</span>
+        <span class="card-meta-item">🍽 Ristorante</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Area Sosta Es Canar</div>
+      <div class="card-text">Zona parcheggio tollerata nelle vicinanze del mercato hippie di Es Canar. Servizi limitati, buona posizione per visitare la costa nord-est. Non è un'area sosta ufficiale, verificare la situazione in loco.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Variabile</span>
+        <span class="card-meta-item">🔌 Servizi limitati</span>
+        <span class="card-meta-item">⚠️ Tollerata</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Dalt Vila</div>
+      <div class="card-text">Utile per visite giornaliere alla città vecchia. Parcheggio zona blu sotto le mura, non adatto per il pernottamento. Buona alternativa per esplorare il centro storico e il porto.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~2€/h</span>
+        <span class="card-meta-item">🏛 Vicino centro</span>
+        <span class="card-meta-item">🚫 No pernottamento</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la visita a Ibiza</div>
+
+    <a class="link-item" href="https://www.ibiza.travel/it/" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏝</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Ibiza</div>
+        <div class="link-item-url">ibiza.travel</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://whc.unesco.org/en/list/417" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏰</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Dalt Vila UNESCO</div>
+        <div class="link-item-url">whc.unesco.org</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.balearia.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🚢</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Baleària Traghetti</div>
+        <div class="link-item-url">balearia.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://campingibiza.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏕</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Camping La Playa</div>
+        <div class="link-item-url">campingibiza.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=38.91&lng=1.42" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Ibiza</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Ibiza,+Spain" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Ibiza</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a class="prev" href="denia.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">⚓ Dénia — Giorno 1</span>
+    </a>
+    <a class="next" href="formentera.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🚲 Formentera — Giorno 4</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Ibiza
+  </div>
+
+  <script>
+    var map = L.map('detail-map').setView([38.9067, 1.4206], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([38.9067, 1.4206]).addTo(map)
+      .bindPopup('<strong>🏝 Ibiza</strong><br>Giorni 2–3 — Mare')
+      .openPopup();
+  </script>
+
+</body>
+</html>

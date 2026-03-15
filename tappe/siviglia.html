@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Siviglia — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2; --cyan: #06B6D4; --green: #22C55E; --amber: #F59E0B;
+      --pink: #EC4899; --purple: #6366F1; --bg: #FFF7ED; --bg-card: #FFFFFF;
+      --text: #1E293B; --text-muted: #64748B; --text-light: #94A3B8; --border: #E2E8F0;
+      --tip-bg: #FFFBEB; --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07); --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px; --r-sm: 10px; --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #EC4899;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 15</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(160deg, #831843, #EC4899, #FCA5A5)">
+    <span class="page-hero-cat">Città</span>
+    <span class="page-hero-emoji">🏛</span>
+    <div class="page-hero-day">Giorno 15</div>
+    <h1 class="page-hero-name">Siviglia</h1>
+    <p class="page-hero-brief">Gran finale andaluso: flamenco, azulejos e passione</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">La capitale dell'Andalusia, un trionfo di colore e passione</div>
+    <div class="overview-text">
+      <p>Siviglia è il gran finale perfetto del viaggio — una città che assale tutti i sensi con il suo colore, la sua passione e la sua storia millenaria. Capitale dell'Andalusia e quarta città della Spagna per dimensioni, Siviglia è stata un centro culturale di primo piano per oltre 2.000 anni.</p>
+      <p>La Plaza de España, costruita per l'Esposizione Iberoamericana del 1929, è un edificio semicircolare mozzafiato decorato con piastrelle azulejo dipinte a mano che rappresentano ogni provincia spagnola, con un canale navigabile, ponti e un vasto parco. Il Real Alcázar, palazzo reale in uso continuo dal X secolo, è un capolavoro dell'architettura mudéjar — intricati motivi geometrici islamici si fondono con elementi gotici e rinascimentali in un complesso di cortili, giardini e saloni.</p>
+      <p>La Cattedrale di Siviglia è la più grande cattedrale gotica del mondo, custodisce la tomba di Cristoforo Colombo e l'iconica torre della Giralda (originariamente un minareto moresco). Il Barrio de Santa Cruz, antico quartiere ebraico, è un labirinto di stradine e piazzette nascoste profumate di fiori d'arancio e gelsomino.</p>
+      <p>E ovunque, il suono della chitarra flamenca e il profumo delle tapas riempiono l'aria. Siviglia è la città dove la tradizione andalusa vive nella vita quotidiana: nelle taberne storiche, nei tablao di flamenco, nelle feste di quartiere e nell'arte del vivere lento e appassionato.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Monumenti, quartieri e spettacoli di flamenco</div>
+
+    <div class="card">
+      <div class="card-title">🏛 Plaza de España</div>
+      <div class="card-text">Spettacolare edificio semicircolare costruito per l'Esposizione del 1929, decorato con piastrelle azulejo che rappresentano ogni provincia spagnola. Canale navigabile con barchette a remi, ponti decorati e il vastissimo Parque de María Luisa tutto intorno. Uno dei luoghi più fotografati della Spagna.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">⏱ 1-2 ore</span>
+        <span class="card-meta-item">🌳 Parque María Luisa</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏰 Real Alcázar</div>
+      <div class="card-text">Palazzo reale patrimonio UNESCO, capolavoro dell'architettura mudéjar e gotica. In uso continuo dal X secolo, è stato anche set dei Giardini Acquatici di Dorne in Game of Thrones. Cortili decorati con stucchi e azulejos, giardini lussureggianti con fontane e padiglioni. Prenotazione online obbligatoria.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 9:30-17:00 (inv) / 9:30-19:00 (est)</span>
+        <span class="card-meta-item">💰 ~14,50€</span>
+        <span class="card-meta-item">🎫 Prenotazione obbligatoria</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛪ Cattedrale e Giralda</div>
+      <div class="card-text">La più grande cattedrale gotica del mondo. All'interno custodisce la tomba di Cristoforo Colombo. La Giralda, antica torre minareto moresca, si sale attraverso 34 rampe (senza scalini!) per una vista panoramica impareggiabile sulla città.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~12€</span>
+        <span class="card-meta-item">🆓 Lunedì gratis 16:30-18:00</span>
+        <span class="card-meta-item">⏱ 1.5-2 ore</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏘 Barrio de Santa Cruz</div>
+      <div class="card-text">L'antico quartiere ebraico, un labirinto di stradine strette, case imbiancate decorate con azulejos e piazzette nascoste. Plaza de los Venerables, Callejón del Agua e decine di angoli fotogenici. Passeggiare senza meta è il modo migliore per scoprirlo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🚶 Passeggiata libera</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏛 Torre del Oro</div>
+      <div class="card-text">Torre moresca del XIII secolo sulla riva del Guadalquivir. Ospita un piccolo museo marittimo. La vera magia è il tramonto visto dalla riva del fiume, con la torre dorata che si riflette nell'acqua.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~3€</span>
+        <span class="card-meta-item">🆓 Lunedì gratis</span>
+        <span class="card-meta-item">🌅 Tramonto spettacolare</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🍄 Metropol Parasol (Setas de Sevilla)</div>
+      <div class="card-text">Struttura moderna in legno tra le più grandi al mondo, con una passerella panoramica sul tetto che offre viste a 360° sulla città. Un contrasto sorprendente con l'architettura storica circostante. Al piano interrato, resti archeologici romani.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~5€</span>
+        <span class="card-meta-item">🌅 Vista panoramica</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💃 Spettacolo di Flamenco</div>
+      <div class="card-text">Siviglia è la culla del flamenco. Numerosi tablao nei quartieri di Santa Cruz e Triana offrono spettacoli autentici e intensi di circa un'ora. L'esperienza del flamenco dal vivo — con canto, chitarra, battito di mani e danza — è indimenticabile e profondamente emotiva.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~20-35€</span>
+        <span class="card-meta-item">⏱ ~1 ora</span>
+        <span class="card-meta-item">🎸 Canto, chitarra e danza</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Orari principali</div>
+        <div class="card-text">Alcázar: 9:30-17:00 (inverno), 9:30-19:00 (estate). ~14,50€, prenotazione obbligatoria online. Cattedrale: Lun-Sab 11-17, Dom 14:30-18. ~12€. Lunedì gratis 16:30-18:00.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come arrivare</div>
+        <div class="card-text">Da Tarifa via A-381 e AP-4 (~2h). Da Málaga via AP-7 e A-92 (~2,5h). Autostrade ben tenute e scorrevoli.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio camper</div>
+        <div class="card-text">NON entrare in centro con il camper — ZTL severa e strade strettissime. Usare il Parcheggio Charco de la Pava (zona nord/Expo, gratuito, grande) e prendere il bus C1/C2 per il centro. Oppure Camping Las Almenas con bus diretto.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">CALDO! In estate 35-45°C (una delle città più calde d'Europa). Primavera e autunno ideali (22-30°C). Inverno mite 8-18°C. In estate visitare i monumenti al mattino presto e nel tardo pomeriggio.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">⚠️</span>
+      <div class="tip-text">Non entrare MAI in centro con il camper: le strade sono strettissime, la ZTL è monitorata con telecamere e le multe sono salate. Il Parcheggio Charco de la Pava è gratuito, sicuro e ben collegato con i bus. Prenotate l'Alcázar online con largo anticipo!</div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare col Camper -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Campeggi e aree sosta nella zona</div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping Villsom (Las Almenas)</div>
+      <div class="card-text">Campeggio a nord della città con bus diretto per il centro. Piscina, ristorante, bagni moderni. La soluzione più comoda per visitare Siviglia in camper senza stress.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~28-38€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🚌 Bus per il centro</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Charco de la Pava</div>
+      <div class="card-text">Grande area lungo il fiume nella zona dell'Expo. Gratuito e molto usato dai camperisti. Nessun servizio disponibile, ma posizione eccellente a 15 minuti in bus dal centro storico.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">⚠️ Nessun servizio</span>
+        <span class="card-meta-item">🚌 15 min bus per centro</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Área de autocaravanas Sevilla</div>
+      <div class="card-text">Area sosta comunale con servizi base per camper. Posizione comoda per raggiungere il centro con i mezzi pubblici. Scarico acque, elettricità e acqua potabile disponibili.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~12-15€/notte</span>
+        <span class="card-meta-item">🔌 Servizi completi</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping Dehesa Nueva (Dos Hermanas)</div>
+      <div class="card-text">Campeggio a circa 15 minuti da Siviglia, nella tranquilla Dos Hermanas. Piscina, ampio spazio e ambiente rilassato. Ottima alternativa se i posti più vicini alla città sono pieni.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~20-28€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🚗 15 min da Siviglia</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la visita</div>
+
+    <a href="https://www.alcazarsevilla.org" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏰</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Real Alcázar (prenotazione)</div>
+        <div class="link-item-url">alcazarsevilla.org</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.catedraldesevilla.es" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">⛪</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Cattedrale di Siviglia</div>
+        <div class="link-item-url">catedraldesevilla.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.visitasevilla.es" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏛</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Siviglia</div>
+        <div class="link-item-url">visitasevilla.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.tablaoflamencoelsarenal.com" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">💃</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Flamenco a Siviglia</div>
+        <div class="link-item-url">tablaoflamencoelsarenal.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://park4night.com/it/search?lat=37.38&lng=-5.99" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Siviglia</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://maps.google.com/?q=Siviglia,+Spain" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Mappa -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Siviglia</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="tarifa.html">
+      <span class="prevnext-label">← Precedente</span>
+      <span class="prevnext-name">Tarifa — Giorni 13-14</span>
+    </a>
+    <a href="../index.html" class="next">
+      <span class="prevnext-label">Fine del viaggio</span>
+      <span class="prevnext-name">Torna all'itinerario completo</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🇪🇸 15 Giorni nel Sud della Spagna — Siviglia
+  </div>
+
+  <script>
+    const map = L.map('detail-map', { scrollWheelZoom: false }).setView([37.3772, -5.9869], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([37.3772, -5.9869]).addTo(map).bindPopup('<strong>Siviglia</strong><br>Capitale dell\'Andalusia');
+  </script>
+
+</body>
+</html>

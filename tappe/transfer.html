@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Dénia → Andalusia — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #6366F1;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+
+    .route-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); color:white; font-size:13px; font-weight:700; padding:6px 14px; border-radius:var(--r-full); margin-top:10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 5</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #312E81, #6366F1, #818CF8)">
+    <span class="page-hero-cat">Trasferimento</span>
+    <span class="page-hero-emoji">🚐</span>
+    <div class="page-hero-day">Giorno 5</div>
+    <h1 class="page-hero-name">Dénia → Andalusia</h1>
+    <p class="page-hero-brief">Traversata dalla Costa Blanca verso il sud, attraverso paesaggi che cambiano</p>
+    <span class="route-badge">📏 ~400 km · ⏱ 4–5 ore</span>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Giornata di trasferimento dalla costa levantina all'Andalusia</div>
+    <div class="overview-text">
+      <p>Questa è la giornata di trasferimento — il viaggio dalle Isole Baleari alla terraferma e poi verso sud fino all'Andalusia. Dopo il traghetto mattutino di ritorno a Dénia, il percorso segue l'autostrada A-7/AP-7 lungo la splendida Costa Blanca e attraverso la regione di Murcia.</p>
+      <p>La guida è di circa 400 km fino a Cabo de Gata, pari a 4-5 ore senza soste. Lungo il percorso si attraversano alcuni dei paesaggi più interessanti della Spagna: le scogliere bianche di Alicante con il suo castello arroccato, i laghi salati rosa di Torrevieja che sembrano un miraggio, le pianure agricole di Murcia punteggiate di agrumeti e il paesaggio sempre più arido man mano che ci si avvicina alla provincia di Almería.</p>
+      <p>È una giornata ideale per fare soste strategiche e scoprire angoli meno turistici della Spagna. Alicante merita una sosta veloce per il Castello di Santa Bárbara, mentre la Laguna Rosa di Torrevieja è un'occasione fotografica imperdibile. Se si ha più tempo, Cartagena offre un anfiteatro romano perfettamente conservato e un'affascinante architettura modernista.</p>
+      <p>Il paesaggio cambia progressivamente durante il viaggio: dalla vegetazione lussureggiante della Costa Blanca si passa alle distese aride e quasi lunari della provincia di Almería, dove l'Europa sembra già Africa. Questo contrasto rende il trasferimento un'esperienza di viaggio a sé stante.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere Lungo il Percorso -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere Lungo il Percorso</h2>
+    <div class="section-sub">Soste consigliate durante il trasferimento</div>
+
+    <div class="card">
+      <div class="card-title">🏰 Alicante — Castillo de Santa Bárbara</div>
+      <div class="card-text">Imponente fortezza sulla cima del monte Benacantil, con viste panoramiche su tutta la città e il porto. Si raggiunge in ascensore dalla spiaggia del Postiguet o a piedi. Una sosta veloce di 30 minuti dall'autostrada per un panorama mozzafiato.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">⏱ Deviazione ~30 min</span>
+        <span class="card-meta-item">💰 Gratis (ascensore ~2.70€)</span>
+        <span class="card-meta-item">👁 Vista panoramica</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🩷 Torrevieja — Laguna Rosa</div>
+      <div class="card-text">Lago salato dal colore rosa intenso, uno spettacolo naturale incredibile perfetto per le fotografie. Il colore è dovuto a un microrganismo che prospera nell'alta salinità. Visibile dalla strada, accessibile con una breve deviazione. Da non perdere!</div>
+      <div class="card-meta">
+        <span class="card-meta-item">⏱ Deviazione breve</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📸 Fotogenico</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏛 Cartagena</div>
+      <div class="card-text">Città portuale con un anfiteatro romano perfettamente conservato, architettura modernista di inizio '900 e una storia millenaria come porto militare. Merita una sosta più lunga se il tempo lo permette. Il centro è compatto e visitabile a piedi.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">⏱ Deviazione ~1h</span>
+        <span class="card-meta-item">🏛 Anfiteatro romano</span>
+        <span class="card-meta-item">🏗 Art Nouveau</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏰 Puerto Lumbreras / Lorca</div>
+      <div class="card-text">Cittadina con un castello medievale e un centro storico autentico, lontano dai circuiti turistici. La cultura murciana si vive qui in modo genuino: tapas economiche, piazzette tranquille e un ritmo di vita rilassato. Sosta ideale per il pranzo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏰 Castello medievale</span>
+        <span class="card-meta-item">🍽 Tapas autentiche</span>
+        <span class="card-meta-item">👥 Poco turistico</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🕌 Almería</div>
+      <div class="card-text">Se si arriva tardi, Almería è un ottimo punto di sosta prima di Cabo de Gata. La Alcazaba, la più grande fortezza araba della Spagna dopo l'Alhambra, domina la città. La cattedrale-fortezza è un unicum architettonico, costruita per resistere agli attacchi dei pirati.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕌 Alcazaba</span>
+        <span class="card-meta-item">⛪ Cattedrale-fortezza</span>
+        <span class="card-meta-item">🌙 Sosta notturna</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Informazioni utili per il trasferimento</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🛣 Percorso</div>
+        <div class="card-text">Dénia → A-7/AP-7 → Alicante → Murcia → Almería → Cabo de Gata. Circa 400 km totali, 4–5 ore di guida effettiva. Strada prevalentemente autostradale, ben tenuta e segnalata.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Pedaggi</div>
+        <div class="card-text">La AP-7 è gratuita dal 2020 su quasi tutto il percorso lungo la costa mediterranea. Nessun costo di pedaggio significativo previsto per questo itinerario. Risparmio importante rispetto a qualche anno fa.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⛽ Carburante</div>
+        <div class="card-text">Fare il pieno prima di Murcia, dove i prezzi del carburante sono leggermente più bassi. Stazioni di servizio frequenti sulla AP-7, le migliori sono dopo Alicante. Usare geoportalgasolineras.es per confrontare i prezzi.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠️ Attenzione</div>
+        <div class="card-text">ZTL (Zone a Traffico Limitato) nelle città costiere: Alicante centro e Cartagena centro hanno aree pedonali e zone riservate. Aree di servizio sulla AP-7 ogni 40–60 km per soste, rifornimento e servizi igienici.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <span class="tip-text">Il traghetto di ritorno da Ibiza a Dénia parte la mattina presto (6:00–8:00). Prendi il primo disponibile per avere tutta la giornata per il trasferimento e arrivare a Cabo de Gata prima del tramonto.</span>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare per la Notte</h2>
+    <div class="section-sub">Se non si arriva a Cabo de Gata entro sera</div>
+
+    <div class="card">
+      <div class="card-title">📍 Area Sosta Almería Città</div>
+      <div class="card-text">Varie aree sosta nella periferia di Almería con servizi basilari (acqua, scarico). Posizione comoda per visitare la Alcazaba la mattina successiva prima di proseguire verso Cabo de Gata (30 minuti di guida).</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~10€/notte</span>
+        <span class="card-meta-item">🚿 Servizi base</span>
+        <span class="card-meta-item">🏛 Vicino Alcazaba</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Área de Autocaravanas Roquetas de Mar</div>
+      <div class="card-text">Area sosta attrezzata con buoni servizi, situata vicino alla spiaggia nella località balneare di Roquetas de Mar. Elettricità, acqua, scarico e docce disponibili. Ottima per una notte di transito confortevole.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~12€/notte</span>
+        <span class="card-meta-item">🔌 Elettricità</span>
+        <span class="card-meta-item">🏖 Vicino spiaggia</span>
+        <span class="card-meta-item">🚿 Docce</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Playa Retamar</div>
+      <div class="card-text">Parcheggio tra Almería e Cabo de Gata, nella località di Retamar. Tollerato per una notte, posizione strategica a metà strada. Spiaggia accessibile a piedi, zona tranquilla e poco frequentata.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🏖 Spiaggia vicina</span>
+        <span class="card-meta-item">⚠️ Tollerato 1 notte</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per il trasferimento</div>
+
+    <a class="link-item" href="https://www.balearia.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🚢</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Baleària (traghetto ritorno)</div>
+        <div class="link-item-url">balearia.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://geoportalgasolineras.es" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">⛽</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Gasolineras Economiche</div>
+        <div class="link-item-url">geoportalgasolineras.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=38.35&lng=-0.49" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Costa Blanca</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=36.84&lng=-2.47" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Almería</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?saddr=Dénia,+Spain&daddr=Cabo+de+Gata,+Spain" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps Percorso</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa del Percorso</h2>
+    <div class="section-sub">Dénia → Andalusia</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a class="prev" href="formentera.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🚲 Formentera — Giorno 4</span>
+    </a>
+    <a class="next" href="cabodegata.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🏜 Cabo de Gata-Níjar — Giorni 6–7</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Dénia → Andalusia
+  </div>
+
+  <script>
+    var map = L.map('detail-map').setView([37.9500, -1.1300], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Route markers
+    var markers = [
+      { lat: 38.8408, lng: 0.1057, label: '⚓ Dénia (Partenza)', color: '#6366F1' },
+      { lat: 38.3452, lng: -0.4810, label: '🏰 Alicante', color: '#F59E0B' },
+      { lat: 37.9788, lng: -0.6813, label: '🩷 Torrevieja', color: '#EC4899' },
+      { lat: 37.6057, lng: -0.9916, label: '🏛 Cartagena', color: '#F59E0B' },
+      { lat: 36.8340, lng: -2.4637, label: '🕌 Almería', color: '#F59E0B' },
+      { lat: 36.7644, lng: -2.1282, label: '🏜 Cabo de Gata (Arrivo)', color: '#22C55E' }
+    ];
+
+    markers.forEach(function(m) {
+      L.marker([m.lat, m.lng]).addTo(map)
+        .bindPopup('<strong>' + m.label + '</strong>');
+    });
+
+    // Draw route line
+    var routeCoords = markers.map(function(m) { return [m.lat, m.lng]; });
+    L.polyline(routeCoords, { color: '#6366F1', weight: 3, opacity: 0.7, dashArray: '10, 8' }).addTo(map);
+
+    // Fit bounds
+    map.fitBounds(routeCoords, { padding: [30, 30] });
+  </script>
+
+</body>
+</html>

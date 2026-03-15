@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Cabo de Gata-Nijar — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #22C55E;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorni 6–7</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #064E3B, #059669, #34D399)">
+    <span class="page-hero-cat">Natura</span>
+    <span class="page-hero-emoji">🌊</span>
+    <div class="page-hero-day">Giorni 6–7</div>
+    <h1 class="page-hero-name">Cabo de Gata-Nijar</h1>
+    <p class="page-hero-brief">Il gioiello nascosto dell'Andalusia: scogliere vulcaniche e acque cristalline</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Parco Naturale vulcanico sulla costa mediterranea dell'Almeria</div>
+    <div class="overview-text">
+      <p>Il Parco Naturale di Cabo de Gata-Nijar è il gioiello nascosto dell'Andalusia — la costa più arida d'Europa ma al tempo stesso incredibilmente ricca di biodiversità. Questo paesaggio vulcanico presenta spettacolari scogliere nere che precipitano in acque mediterranee cristalline, creando scenari di bellezza selvaggia e incontaminata.</p>
+      <p>Il parco copre 460 km² di terra e mare protetti, con spiagge incontaminate raggiungibili solo a piedi o attraverso strade sterrate. Playa de los Genoveses è una mezzaluna perfetta di sabbia dorata incorniciata da dune e colline, raggiungibile con una camminata di 2 km. Playa de Mónsul, con la sua iconica duna di lava nera e l'enorme masso, è stata location cinematografica di Indiana Jones e l'Ultima Crociata.</p>
+      <p>L'Arrecife de las Sirenas (Scogliera delle Sirene) presso il punto del faro è un gruppo di camini vulcanici che emergono dal mare — chiamato così per le foche monache che un tempo lo abitavano. Il panorama al tramonto è tra i più suggestivi di tutta la costa spagnola, con le formazioni rocciose che si stagliano contro il cielo infuocato.</p>
+      <p>Il grazioso villaggio di San José funge da base principale del parco, con case imbiancate a calce e ottimi ristoranti di pesce fresco. La riserva marina rende questa zona uno dei migliori spot per lo snorkeling di tutta la Spagna, con fondali ricchi di posidonia e vita marina mediterranea.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni principali del Parco Naturale</div>
+
+    <div class="card">
+      <div class="card-title">🏖 Playa de los Genoveses</div>
+      <div class="card-text">Spiaggia incontaminata di sabbia dorata in una baia protetta. Nessun edificio, nessun servizio — solo natura selvaggia allo stato puro. L'accesso avviene tramite strada sterrata (2 km dal parcheggio, l'ultimo km a piedi). Meglio visitarla al mattino presto, quando la luce è magica e non c'è quasi nessuno.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuita</span>
+        <span class="card-meta-item">🚶 2 km a piedi</span>
+        <span class="card-meta-item">🌅 Meglio al mattino</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌋 Playa de Mónsul</div>
+      <div class="card-text">Celebre spiaggia vulcanica con formazioni di lava nera e un enorme masso nella zona di surf. Location del film Indiana Jones e l'Ultima Crociata. L'accesso avviene dalla stessa strada sterrata di Genoveses. In estate il parcheggio è molto limitato e si esaurisce rapidamente.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuita</span>
+        <span class="card-meta-item">🎬 Set cinematografico</span>
+        <span class="card-meta-item">🅿️ Parcheggio limitato</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🪨 Arrecife de las Sirenas</div>
+      <div class="card-text">Formazioni rocciose vulcaniche presso il punto del faro (Faro de Cabo de Gata). Spettacolare al tramonto, quando le rocce si accendono di colori caldi. Breve passeggiata dal parcheggio fino al punto panoramico. Un luogo di straordinaria potenza paesaggistica.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🌅 Tramonto imperdibile</span>
+        <span class="card-meta-item">🚶 Breve passeggiata</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏘 San José</div>
+      <div class="card-text">Grazioso villaggio di pescatori dalle case imbiancate a calce, eccellenti ristoranti di pesce e un centro immersioni. È la base ideale per esplorare il parco, con tutti i servizi necessari: supermercati, ristoranti, farmacia e centro diving per esplorare i fondali della riserva marina.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🍽 Ristoranti pesce</span>
+        <span class="card-meta-item">🤿 Centro immersioni</span>
+        <span class="card-meta-item">🛒 Servizi</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏝 Cala de San Pedro</div>
+      <div class="card-text">Caletta remota raggiungibile solo in barca o con un trekking di 1,5 ore da Las Negras. Acqua cristallina, una grotta naturale e una piccola comunità di campeggiatori hippie. Un angolo di paradiso fuori dal tempo, perfetto per chi cerca avventura e tranquillità assoluta.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuita</span>
+        <span class="card-meta-item">🥾 Trekking 1.5h</span>
+        <span class="card-meta-item">🚤 Anche in barca</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎣 Los Escullos / La Isleta del Moro</div>
+      <div class="card-text">Pittoreschi borghi di pescatori lungo la costa rocciosa, meno visitati rispetto a San José. Atmosfera autentica, piccole trattorie e paesaggio costiero spettacolare. La Isleta del Moro è particolarmente fotogenica con il suo isolotto collegato da una striscia di roccia.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📸 Molto fotogenico</span>
+        <span class="card-meta-item">🍽 Trattorie locali</span>
+        <span class="card-meta-item">🏖 Meno affollato</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Accesso al Parco</div>
+        <div class="card-text">Il parco è aperto 24h. In estate l'accesso su strada sterrata verso Genoveses/Mónsul è limitato: aperto 9:00–22:00 con quota veicoli. Arrivare prima delle 9! In luglio-agosto l'accesso può essere chiuso una volta esaurito il parcheggio.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come Arrivare</div>
+        <div class="card-text">Da Almería prendere la AL-3115 verso sud (~40 min). Da Murcia/Alicante tramite AP-7 poi AL-3115. Le strade all'interno del parco sono strette e alcune non asfaltate.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Parcheggio principale alla fine della strada sterrata (condiviso per Genoveses/Mónsul). Capacità limitata, gratuito. In estate arrivare prima delle 8:30. I camper grandi (>6m) possono avere difficoltà sulle strade sterrate.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">Caldo e secco. Estate 30–38°C con ombra minima sulle spiagge. Primavera (aprile–maggio) e autunno (settembre–ottobre) ideali a 22–28°C. Possibili venti forti.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Aree di sosta e campeggi nella zona</div>
+
+    <div class="card">
+      <div class="card-title">📍 Area Camper San José</div>
+      <div class="card-text">Area sosta comunale nel villaggio di San José. Servizi base disponibili: acqua e scarico. Posizione comoda per raggiungere a piedi ristoranti, supermercato e le spiagge del parco.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~10€/notte</span>
+        <span class="card-meta-item">💧 Acqua</span>
+        <span class="card-meta-item">🚿 Scarico</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping Tau (San José)</div>
+      <div class="card-text">Campeggio completo con piscina, ristorante e bagni puliti. Piazzole ombreggiate con allacciamento elettrico. Ottima base per esplorare il parco con tutti i comfort necessari dopo una giornata in spiaggia.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 25–35€/notte</span>
+        <span class="card-meta-item">🔌 Elettricità</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🍽 Ristorante</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping Los Escullos</div>
+      <div class="card-text">Campeggio situato direttamente nel parco, piccolo e tranquillo. Docce e bagni disponibili. Posizione perfetta per chi vuole immergersi nella natura del parco e visitare i borghi meno turistici della costa.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 18–25€/notte</span>
+        <span class="card-meta-item">🚿 Docce</span>
+        <span class="card-meta-item">🏞 Nel parco</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Las Negras</div>
+      <div class="card-text">Area tollerata per camper vicino al villaggio di Las Negras. Gratuito e senza servizi, ma in posizione eccellente per il trekking verso Cala de San Pedro e per esplorare la parte nord del parco.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🔌 No servizi</span>
+        <span class="card-meta-item">⚠️ Tollerato</span>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <span class="tip-text">In estate le strade sterrate verso Genoveses e Mónsul hanno un limite di veicoli giornaliero. Arrivare prima delle 8:30 è fondamentale per assicurarsi l'accesso. I camper grandi potrebbero avere difficoltà sulla strada sterrata.</span>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la tappa</div>
+
+    <a class="link-item" href="https://www.cabodegata.net" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏞</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Parque Natural Cabo de Gata</div>
+        <div class="link-item-url">cabodegata.net</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.islasubmarina.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🤿</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Centro Immersioni San José</div>
+        <div class="link-item-url">islasubmarina.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.cabodegataalmeria.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏖</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Info Spiagge Cabo de Gata</div>
+        <div class="link-item-url">cabodegataalmeria.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=36.76&lng=-2.13" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Cabo de Gata</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Cabo+de+Gata+Nijar+Natural+Park" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Cabo de Gata-Nijar</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="transfer.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🚗 Dénia → Andalusia — Giorno 5</span>
+    </a>
+    <a class="next" href="tabernas.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🏜 Desierto de Tabernas — Giorno 8</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Cabo de Gata-Nijar
+  </div>
+
+  <script>
+    var map = L.map('detail-map', { scrollWheelZoom: false }).setView([36.7644, -2.1306], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+    L.marker([36.7644, -2.1306]).addTo(map)
+      .bindPopup('<strong>🌊 Cabo de Gata-Nijar</strong><br>Giorni 6–7 — Natura')
+      .openPopup();
+  </script>
+
+</body>
+</html>

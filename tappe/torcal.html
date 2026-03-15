@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>El Torcal de Antequera — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2; --cyan: #06B6D4; --green: #22C55E; --amber: #F59E0B;
+      --pink: #EC4899; --purple: #6366F1; --bg: #FFF7ED; --bg-card: #FFFFFF;
+      --text: #1E293B; --text-muted: #64748B; --text-light: #94A3B8; --border: #E2E8F0;
+      --tip-bg: #FFFBEB; --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07); --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px; --r-sm: 10px; --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #22C55E;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 12</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #1A2E05, #4D7C0F, #A3E635)">
+    <span class="page-hero-cat">Natura</span>
+    <span class="page-hero-emoji">🪨</span>
+    <div class="page-hero-day">Giorno 12</div>
+    <h1 class="page-hero-name">El Torcal de Antequera</h1>
+    <p class="page-hero-brief">Labirinto carsico surreale nel cuore dell'Andalusia</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Uno dei paesaggi carsici più straordinari d'Europa</div>
+    <div class="overview-text">
+      <p>El Torcal de Antequera è uno dei paesaggi carsici più straordinari d'Europa — un labirinto roccioso surreale creato da oltre 200 milioni di anni di processi geologici. Quello che un tempo era un fondale marino durante il periodo Giurassico è stato sollevato e scolpito dal vento e dall'acqua in formazioni straordinarie: pilastri calcarei imponenti, rocce a forma di fungo, corridoi stretti e archi naturali.</p>
+      <p>Il sito copre 1.171 ettari e si trova a 1.200 metri di altitudine nel cuore dell'Andalusia. Camminare attraverso El Torcal è come esplorare un pianeta alieno: gli strati orizzontali della roccia creano un aspetto distintivo a "torta a strati" che non ha eguali in Europa.</p>
+      <p>La flora è altrettanto affascinante: specie uniche adattate alle fessure calcaree, macchia mediterranea e antichi lecci. Il sito ospita anche avvoltoi grifoni, aquile di Bonelli e stambecchi iberici. Il silenzio e la maestosità del luogo lo rendono un'esperienza meditativa oltre che naturalistica.</p>
+      <p>A soli 15 km, il Dolmen de Menga è una tomba megalitica patrimonio UNESCO risalente a 5.000 anni fa — una delle più grandi d'Europa con il suo architrave da 180 tonnellate. Insieme ai vicini Dolmen de Viera e Tholos de El Romeral, forma un complesso archeologico di importanza mondiale.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Sentieri, formazioni rocciose e tesori archeologici</div>
+
+    <div class="card">
+      <div class="card-title">🟢 Ruta Verde (Sentiero Verde)</div>
+      <div class="card-text">Sentiero circolare facile di 1,5 km, percorribile in circa 45 minuti. Attraversa il cuore delle formazioni rocciose più spettacolari. Ben segnalato con frecce verdi. Perfetto per tutte le età e livelli di fitness. Accesso libero e gratuito.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📏 1,5 km</span>
+        <span class="card-meta-item">⏱ ~45 min</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">👶 Per tutti</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🟡 Ruta Amarilla (Sentiero Giallo)</div>
+      <div class="card-text">Sentiero circolare di difficoltà media, 3 km, circa 2 ore. Terreno più vario con viste panoramiche sulla piana di Antequera e sulle montagne circostanti. Segnalato con frecce gialle. Offre prospettive diverse e formazioni ancora più impressionanti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">📏 3 km</span>
+        <span class="card-meta-item">⏱ ~2 ore</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🥾 Media difficoltà</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔴 Ruta Roja (solo con guida)</div>
+      <div class="card-text">Il percorso più completo e affascinante, accessibile solo con guida prenotata al centro visitatori. Permette di vedere formazioni rare, zone meno frequentate e fauna selvatica. La guida fornisce spiegazioni geologiche e naturalistiche approfondite.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~12€</span>
+        <span class="card-meta-item">🎫 Prenotazione al centro visitatori</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏛 Centro de Visitantes Torcal Alto</div>
+      <div class="card-text">Centro di interpretazione con esposizioni geologiche, modelli 3D e collezioni di fossili che spiegano la formazione del paesaggio. Piccolo bar-caffetteria con terrazza panoramica. Punto di partenza per tutti i sentieri.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">☕ Caffetteria</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏛 Dolmen de Menga (UNESCO)</div>
+      <div class="card-text">Tomba megalitica di 5.700 anni, a 15 km nel centro di Antequera. Corridoio lungo 25 metri coperto da un architrave monolitico di 180 tonnellate — uno dei più grandi d'Europa. L'orientamento è allineato al Torcal stesso, suggerendo un legame sacro tra i due luoghi.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🕐 Mar-Dom 9:00-18:00</span>
+        <span class="card-meta-item">🏆 Patrimonio UNESCO</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏛 Dolmen de Viera e Tholos de El Romeral</div>
+      <div class="card-text">Due ulteriori siti megalitici che completano il complesso UNESCO di Antequera. Il Dolmen de Viera è una galleria coperta più piccola ma perfettamente conservata. Il Tholos de El Romeral presenta una camera circolare con cupola in pietra. Tutti gratuiti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🏆 Patrimonio UNESCO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Orari</div>
+        <div class="card-text">Ruta Verde e Amarilla: libero accesso dall'alba al tramonto. Centro Visitatori: 10:00-17:00 (inverno), 10:00-19:00 (estate). L'ingresso al parco e ai sentieri è completamente gratuito.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come arrivare</div>
+        <div class="card-text">Da Antequera (15 min) via A-7075. Da Málaga (~1h) via A-45 poi A-7075. Strada panoramica con tornanti ma ben asfaltata e percorribile con il camper.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Parcheggio unico al Centro Visitatori, limitato a circa 100 posti. Gratuito. In estate e nei weekend è essenziale arrivare prima delle 10:00. Se pieno, bisogna aspettare che qualcuno esca o tornare più tardi.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">A 1.200m di quota — significativamente più fresco della costa. Estate 18-28°C, inverno 5-12°C. La nebbia è frequente e crea un'atmosfera magica ma riduce la visibilità. Vento forte possibile: portare giacca anche in estate.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <div class="tip-text">Il parcheggio è il punto critico: arrivate presto, specialmente nei weekend e in estate. Se lo trovate pieno, approfittate per visitare i Dolmeni di Antequera e tornate al Torcal nel pomeriggio quando si libera.</div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare col Camper -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Campeggi e aree sosta nella zona</div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping Antequera</div>
+      <div class="card-text">Campeggio con piscina nella città di Antequera. Piazzole ombreggiate, bagni moderni, ristorante e minimarket. Ottima base per visitare sia El Torcal che i Dolmeni.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~22-30€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🍽 Ristorante</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Área de autocaravanas Antequera</div>
+      <div class="card-text">Area sosta per camper in città con servizi base: scarico acque, acqua potabile. Posizione comoda per raggiungere il centro e i siti archeologici.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~8-10€/notte</span>
+        <span class="card-meta-item">🔌 Servizi base</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚠️ Parcheggio El Torcal</div>
+      <div class="card-text">Il parcheggio del Centro Visitatori è esclusivamente diurno. Non è possibile pernottare all'interno del parco naturale.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🚫 Solo diurno</span>
+        <span class="card-meta-item">⚠️ No pernottamento</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛺ Camping La Sierra (Villanueva de la Concepción)</div>
+      <div class="card-text">Piccolo campeggio ai piedi del Torcal, nella tranquilla Villanueva de la Concepción. Ambiente panoramico e rilassato, perfetto per chi vuole stare vicino al parco.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~15-20€/notte</span>
+        <span class="card-meta-item">🏔 Panoramico</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la visita</div>
+
+    <a href="https://www.torcaldeantequera.com" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🪨</span>
+      <div class="link-item-text">
+        <div class="link-item-name">El Torcal sito ufficiale</div>
+        <div class="link-item-url">torcaldeantequera.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.museosdeandalucia.es/web/conjuntoarqueologicoandalucia" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏛</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Dolmeni di Antequera (UNESCO)</div>
+        <div class="link-item-url">museosdeandalucia.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://turismo.antequera.es" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏘</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Antequera</div>
+        <div class="link-item-url">turismo.antequera.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://park4night.com/it/search?lat=36.95&lng=-4.54" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Antequera</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://maps.google.com/?q=El+Torcal+de+Antequera,+Spain" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Mappa -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di El Torcal de Antequera</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="caminito.html">
+      <span class="prevnext-label">← Precedente</span>
+      <span class="prevnext-name">Caminito del Rey — Giorno 11</span>
+    </a>
+    <a href="tarifa.html" class="next">
+      <span class="prevnext-label">Successivo →</span>
+      <span class="prevnext-name">Tarifa — Giorni 13-14</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🇪🇸 15 Giorni nel Sud della Spagna — El Torcal de Antequera
+  </div>
+
+  <script>
+    const map = L.map('detail-map', { scrollWheelZoom: false }).setView([36.9549, -4.5428], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([36.9549, -4.5428]).addTo(map).bindPopup('<strong>El Torcal de Antequera</strong><br>Parco naturale carsico');
+  </script>
+
+</body>
+</html>

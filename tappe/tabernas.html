@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Desierto de Tabernas — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #F59E0B;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html">← Itinerario</a>
+    <div class="topbar-title">Giorno 8</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(160deg, #78350F, #D97706, #FCD34D)">
+    <span class="page-hero-cat">Natura</span>
+    <span class="page-hero-emoji">🏜</span>
+    <div class="page-hero-day">Giorno 8</div>
+    <h1 class="page-hero-name">Desierto de Tabernas</h1>
+    <p class="page-hero-brief">L'unico vero deserto d'Europa: canyon, Western e paesaggi lunari</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Il deserto semiarido più famoso d'Europa, set dei grandi Western</div>
+    <div class="overview-text">
+      <p>Il Deserto di Tabernas è l'unico vero deserto semiarido d'Europa, uno straordinario paesaggio di calanchi, canyon erosi, letti di fiumi secchi e formazioni sedimentarie dai colori intensi. Situato a 30 km a nord di Almería, riceve meno di 250 mm di pioggia all'anno e gode di oltre 3.000 ore di sole annuali.</p>
+      <p>Il paesaggio è surreale: colline brulle striate di ocra, rosso e bianco, profondi burroni scavati dalle inondazioni improvvise e un silenzio quasi extraterrestre. Questa ambientazione unica attirò l'attenzione dei registi cinematografici negli anni '60: Sergio Leone girò qui i suoi leggendari Spaghetti Western (Il Buono, il Brutto e il Cattivo; Per un Pugno di Dollari; Per Qualche Dollaro in Più).</p>
+      <p>Steven Spielberg, Ridley Scott e molti altri seguirono le sue orme. Oggi sopravvivono tre set cinematografici Western trasformati in parchi tematici: Oasys Mini Hollywood (il più famoso), Fort Bravo e Western Leone. Ognuno offre un'esperienza diversa, dagli spettacoli Western alle cavalcate nel deserto.</p>
+      <p>Oltre alla storia del cinema, il deserto offre trekking straordinari attraverso canyon lunari, una flora unica adattata a condizioni estreme e alcuni dei tramonti più spettacolari di tutta la Spagna. La luce del tardo pomeriggio trasforma i calanchi in un'esplosione di colori caldi.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni principali del deserto</div>
+
+    <div class="card">
+      <div class="card-title">🎬 Oasys Mini Hollywood</div>
+      <div class="card-text">Il set originale degli Spaghetti Western di Sergio Leone. Oggi è un parco tematico con spettacoli Western dal vivo (sparatorie, can-can), uno zoo con oltre 800 animali e piscine. Molto turistico ma divertente, soprattutto per le famiglie. La ricostruzione del villaggio Western è suggestiva.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 10:00–19:00 (estate) / 10:00–18:00 (inverno)</span>
+        <span class="card-meta-item">💰 ~24€ adulti</span>
+        <span class="card-meta-item">⏱ Visita: 3–4h</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤠 Fort Bravo</div>
+      <div class="card-text">Un altro set cinematografico storico, meno commerciale di Mini Hollywood. Rievocazioni Western, passeggiate a cavallo nel deserto e spettacoli notturni. L'atmosfera è più rustica e autentica. Ideale per chi cerca un'esperienza Western più genuina e meno da parco divertimenti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 Orari simili a Mini Hollywood</span>
+        <span class="card-meta-item">💰 ~22€</span>
+        <span class="card-meta-item">🐴 Passeggiate a cavallo</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏜 Rambla de Tabernas</div>
+      <div class="card-text">Il letto del fiume principale che taglia il deserto. Trekking spettacolare tra pareti di arenaria colorata, formazioni erosive e un silenzio assoluto. Nessun sentiero segnato — navigare con GPS. La luce migliore è all'alba o al tramonto, quando i canyon si accendono di colori.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📱 GPS necessario</span>
+        <span class="card-meta-item">🌅 Alba/tramonto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👀 Mirador del Desierto</div>
+      <div class="card-text">Diversi punti panoramici lungo la A-92 e la N-340a offrono viste mozzafiato sul deserto. Facilmente accessibili in auto, perfetti per una sosta fotografica. Il panorama spazia su distese di calanchi fino all'orizzonte, con una bellezza che ricorda i deserti americani.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📸 Foto panoramiche</span>
+        <span class="card-meta-item">🚗 Accesso in auto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎥 Western Leone</div>
+      <div class="card-text">Il terzo set cinematografico del deserto, più piccolo e tranquillo degli altri due. Meno commerciale e più suggestivo nell'atmosfera. Perfetto per chi vuole esplorare un set Western senza la confusione dei parchi più grandi. Ottimo per fotografie.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~6€</span>
+        <span class="card-meta-item">📸 Atmosfera autentica</span>
+        <span class="card-meta-item">🤫 Meno affollato</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">🕐 Orari Parchi Tematici</div>
+        <div class="card-text">Oasys aperto tutti i giorni in estate (10–19), solo weekend in inverno. Fort Bravo orari simili. Verificare sempre i siti web prima della visita, gli orari cambiano frequentemente.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Come Arrivare</div>
+        <div class="card-text">Da Almería prendere la A-92 verso nord (~30 min). Da Cabo de Gata via Almería (~1h). Ben segnalato. Strade principali in ottime condizioni.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Parcheggio gratuito in tutti i parchi tematici, ampio e comodo per camper. Per le escursioni nel deserto, parcheggio lungo la N-340a sul ciglio della strada.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">CALDO ESTREMO in estate (40–48°C). MAI fare escursioni tra le 11:00 e le 17:00. Primavera e autunno ideali (20–30°C). Inverno freddo di notte (5°C). Il vento può essere forte.</div>
+      </div>
+    </div>
+
+    <div class="tip-box" style="margin-top:16px;">
+      <span class="tip-ico">⚠️</span>
+      <span class="tip-text"><strong>Sicurezza nel deserto:</strong> Nessuna ombra, nessuna fonte d'acqua. Portare minimo 2 litri d'acqua a persona. GPS indispensabile per le escursioni fuori sentiero. Segnale mobile a tratti assente. Pericolo alluvioni improvvise dopo la pioggia — non sostare nelle ramblas se sono previste precipitazioni.</span>
+    </div>
+  </div>
+
+  <!-- Dove Sostare -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Aree di sosta e campeggi nella zona</div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parking Oasys Mini Hollywood</div>
+      <div class="card-text">Grande parcheggio gratuito del parco tematico. Tollerato per una notte di sosta. Nessun servizio specifico per camper, ma comodo per visitare il parco il mattino seguente senza fretta.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🔌 No servizi</span>
+        <span class="card-meta-item">⚠️ Tollerato 1 notte</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Area Camper Tabernas</div>
+      <div class="card-text">Piccola area di sosta nel villaggio di Tabernas. Acqua disponibile per il rifornimento. Posizione comoda per esplorare il deserto e i parchi tematici circostanti. Il villaggio offre alcuni bar e ristoranti.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~5€/notte</span>
+        <span class="card-meta-item">💧 Acqua</span>
+        <span class="card-meta-item">🏘 Nel villaggio</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping Los Escullos (Cabo de Gata)</div>
+      <div class="card-text">Se preferisci tornare al mare per dormire, il campeggio Los Escullos a Cabo de Gata dista circa 1 ora. Comodo per combinare una giornata nel deserto con il pernottamento in riva al mare.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 18–25€/notte</span>
+        <span class="card-meta-item">🚗 ~1h da Tabernas</span>
+        <span class="card-meta-item">🏖 Sul mare</span>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <span class="tip-text">Le notti nel deserto possono essere molto fredde in inverno e primavera (fino a 5°C). In estate il calore accumulato rende difficile dormire senza aria condizionata. Se possibile, spostarsi sulla costa per la notte.</span>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la tappa</div>
+
+    <a class="link-item" href="https://www.oasysparquetematico.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🎬</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Oasys Mini Hollywood</div>
+        <div class="link-item-url">oasysparquetematico.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.fortbravo.org" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🤠</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Fort Bravo</div>
+        <div class="link-item-url">fortbravo.org</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.degata.com/desierto-de-tabernas" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏜</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Info sul Deserto</div>
+        <div class="link-item-url">degata.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=37.05&lng=-2.39" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Tabernas</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Desierto+de+Tabernas,+Spain" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione del Desierto de Tabernas</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="cabodegata.html">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🌊 Cabo de Gata-Nijar — Giorni 6–7</span>
+    </a>
+    <a class="next" href="nerja.html">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🏄 Nerja — Giorni 9–10</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    🚐 15 Giorni nel Sud della Spagna — Desierto de Tabernas
+  </div>
+
+  <script>
+    var map = L.map('detail-map', { scrollWheelZoom: false }).setView([37.0514, -2.3892], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+    L.marker([37.0514, -2.3892]).addTo(map)
+      .bindPopup('<strong>🏜 Desierto de Tabernas</strong><br>Giorno 8 — Natura')
+      .openPopup();
+  </script>
+
+</body>
+</html>
