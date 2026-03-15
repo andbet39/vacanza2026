@@ -365,5 +365,18 @@
       .openPopup();
   </script>
 
+<script>
+  // Alternative itinerary navigation
+  if (new URLSearchParams(window.location.search).has('from') && new URLSearchParams(window.location.search).get('from') === 'alt') {
+    const ALT_NAV = {
+      prev: { href: 'arrivo-ibiza.html?from=alt', label: '← Tappa precedente', name: '✈️ Roma → Ibiza — Giorno 1' },
+      next: { href: 'formentera.html?from=alt', label: 'Prossima tappa →', name: '🚲 Formentera — Giorno 4' }
+    };
+    const pn = document.querySelector('.prevnext');
+    if (pn) pn.innerHTML = '<a class="prev" href="'+ALT_NAV.prev.href+'"><span class="prevnext-label">'+ALT_NAV.prev.label+'</span><span class="prevnext-name">'+ALT_NAV.prev.name+'</span></a><a class="next" href="'+ALT_NAV.next.href+'"><span class="prevnext-label">'+ALT_NAV.next.label+'</span><span class="prevnext-name">'+ALT_NAV.next.name+'</span></a>';
+    const tb = document.querySelector('.topbar a');
+    if (tb) tb.href = '../alternativo.html';
+  }
+  </script>
 </body>
 </html>

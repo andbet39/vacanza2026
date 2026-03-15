@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>15 Giorni nel Sud della Spagna 🚐</title>
+  <title>Roma → Ibiza → Sud della Spagna ✈️🚐</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -234,6 +234,8 @@
     .fp-citta.active { background: var(--pink);   color: #fff; }
     .fp-tras         { color: var(--purple); border-color: var(--purple); }
     .fp-tras.active  { background: var(--purple); color: #fff; }
+    .fp-volo         { color: #8B5CF6; border-color: #8B5CF6; }
+    .fp-volo.active  { background: #8B5CF6; color: white; border-color: #8B5CF6; }
 
     /* ========================
        TIMELINE
@@ -611,9 +613,9 @@
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-badge">🚐 Road Trip · 15 Giorni in Camper</div>
+    <div class="hero-badge">✈️🚐 Volo + Camper · 15 Giorni</div>
     <h1 class="hero-title">Sud della<br>Spagna</h1>
-    <p class="hero-subtitle">Ibiza &nbsp;·&nbsp; Costa Andalusa &nbsp;·&nbsp; Natura</p>
+    <p class="hero-subtitle">Roma → Ibiza → Valencia → Costa Andalusa</p>
     <a href="#timeline" class="hero-cta">
       <span>Esplora l'itinerario</span>
       <span class="hero-cta-arrow">↓</span>
@@ -626,11 +628,11 @@
 ======================== -->
 <section class="stats-section">
   <div class="stats-scroll">
-    <div class="stat-chip"><span class="stat-chip-emoji">🏝</span><span class="stat-chip-value">3</span><span class="stat-chip-label">Giorni Baleari</span></div>
-    <div class="stat-chip"><span class="stat-chip-emoji">🌊</span><span class="stat-chip-value">5</span><span class="stat-chip-label">Giorni Mare</span></div>
+    <div class="stat-chip"><span class="stat-chip-emoji">✈️</span><span class="stat-chip-value">2</span><span class="stat-chip-label">Voli A/R</span></div>
+    <div class="stat-chip"><span class="stat-chip-emoji">🏝</span><span class="stat-chip-value">4</span><span class="stat-chip-label">Giorni Baleari</span></div>
+    <div class="stat-chip"><span class="stat-chip-emoji">🏙</span><span class="stat-chip-value">2</span><span class="stat-chip-label">Giorni Valencia</span></div>
+    <div class="stat-chip"><span class="stat-chip-emoji">🌊</span><span class="stat-chip-value">4</span><span class="stat-chip-label">Giorni Mare</span></div>
     <div class="stat-chip"><span class="stat-chip-emoji">🏜</span><span class="stat-chip-value">1</span><span class="stat-chip-label">Giorno Deserto</span></div>
-    <div class="stat-chip"><span class="stat-chip-emoji">🏞</span><span class="stat-chip-value">1</span><span class="stat-chip-label">Giorno Canyon</span></div>
-    <div class="stat-chip"><span class="stat-chip-emoji">🏔</span><span class="stat-chip-value">2</span><span class="stat-chip-label">Parco Naturale</span></div>
     <div class="stat-chip"><span class="stat-chip-emoji">🏛</span><span class="stat-chip-value">1</span><span class="stat-chip-label">Città Storica</span></div>
   </div>
 </section>
@@ -638,11 +640,11 @@
 <!-- ========================
      ITINERARY SWITCHER
 ======================== -->
-<section style="padding: 0 20px 8px; display:flex; gap:10px;">
-  <a href="index.html" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; border-radius:var(--r); border:2px solid var(--primary); background:linear-gradient(135deg, rgba(8,145,178,.08), rgba(6,182,212,.12)); font-size:13px; font-weight:700; color:var(--primary); text-align:center; box-shadow: 0 2px 8px rgba(8,145,178,.15);">
+<section class="itinerary-switch" style="padding: 0 20px 8px; display:flex; gap:10px;">
+  <a href="index.html" class="switch-pill" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; border-radius:var(--r); border:1.5px solid var(--border); background:var(--bg-card); font-size:13px; font-weight:700; color:var(--text-muted); text-align:center; transition:transform .15s;">
     🚐 Camper da Dénia
   </a>
-  <a href="alternativo.html" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; border-radius:var(--r); border:1.5px solid var(--border); background:var(--bg-card); font-size:13px; font-weight:700; color:var(--text-muted); text-align:center; transition:transform .15s;">
+  <a href="alternativo.html" class="switch-pill" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; border-radius:var(--r); border:2px solid var(--primary); background:linear-gradient(135deg, rgba(8,145,178,.08), rgba(6,182,212,.12)); font-size:13px; font-weight:700; color:var(--primary); text-align:center; box-shadow: 0 2px 8px rgba(8,145,178,.15);">
     ✈️ Volo + Camper
   </a>
 </section>
@@ -657,6 +659,7 @@
     <button class="filter-pill fp-natura"      data-filter="natura">🌿 Natura</button>
     <button class="filter-pill fp-citta"       data-filter="citta">🏛 Città</button>
     <button class="filter-pill fp-tras"        data-filter="trasferimento">🚐 Trasferimenti</button>
+    <button class="filter-pill fp-volo"        data-filter="volo">✈️ Voli</button>
   </div>
 </section>
 
@@ -677,7 +680,7 @@
 ======================== -->
 <section class="map-section" id="mappa">
   <h2 class="section-title">Il percorso</h2>
-  <p class="section-sub" style="margin-bottom:16px">Da nord a sud, passando per le isole</p>
+  <p class="section-sub" style="margin-bottom:16px">Da Roma alle Baleari, poi in camper nel sud della Spagna</p>
   <div class="map-wrap">
     <div id="leaflet-map"></div>
   </div>
@@ -696,15 +699,15 @@
      FOOTER
 ======================== -->
 <footer class="footer">
-  <div class="footer-icons">🏝 🌊 🏜 🏔 🏞 🏛</div>
+  <div class="footer-icons">✈️ 🏝 🏙 🌊 🏜 🏛</div>
   <p class="footer-quote">
-    "Mare, deserto, canyon,<br>montagna e città<br>— tutto in 15 giorni"
+    "Volo, isole, camper —<br>il sud della Spagna<br>in 15 giorni indimenticabili"
   </p>
-  <span class="footer-van">🚐✨</span>
+  <span class="footer-van">✈️🚐✨</span>
   <p class="footer-credits">
-    Guida di viaggio personale · Primavera 2025<br>
-    Design ispirato a un vero road trip in camper<br>
-    Foto: Wikimedia Commons (CC BY-SA)
+    Guida di viaggio personale · Itinerario Alternativo<br>
+    Design ispirato a un vero road trip<br>
+    Foto: Unsplash (licenze libere)
   </p>
 </footer>
 
@@ -734,21 +737,21 @@
 ====================================== */
 const STOPS = [
   {
-    id: 'denia',
+    id: 'arrivo-ibiza',
     days: 'Giorno 1',
-    name: 'Dénia',
-    emoji: '⚓',
-    category: 'trasferimento',
-    color: '#6366F1',
-    brief: 'Arrivo e imbarco per le Baleari',
-    imgClass: 'bg-denia',
-    imgCaption: '📷 Il porto di Dénia al tramonto dorato',
-    img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80',
-    coords: [38.8408, 0.1057],
-    desc: `Il viaggio inizia da Dénia, pittoresca cittadina valenciana dominata da un antico castello moresco. Dopo aver esplorato la Playa de las Marinas e passeggiato nel caratteristico centro storico, si sale a bordo del traghetto Baleàrlia verso Ibiza. Il viaggio notturno dura circa 7 ore — il modo più dolce per iniziare l'avventura.`,
-    hl: ['Playa de las Marinas', 'Castello di Dénia', 'Porto Baleàrlia', 'Centro storico'],
-    tip: 'Prenota il traghetto con almeno 3-4 settimane di anticipo in alta stagione, specialmente con il camper. I prezzi variano molto tra prenotazione anticipata e last minute!',
-    maps: 'Dénia, Valencia, Spain'
+    name: 'Roma → Ibiza',
+    emoji: '✈️',
+    category: 'volo',
+    color: '#8B5CF6',
+    brief: 'Volo diretto e primo assaggio dell\'isola',
+    imgClass: 'bg-arrivo',
+    imgCaption: '📷 Arrivo a Ibiza — il blu del Mediterraneo dal finestrino',
+    img: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=800&q=80',
+    coords: [38.8729, 1.3731],
+    desc: 'Il viaggio inizia con un volo diretto da Roma Fiumicino a Ibiza — circa 2 ore di volo con vista spettacolare sulle Baleari. Atterri nel primo pomeriggio e hai il tempo di raggiungere l\'alloggio, fare un primo bagno in una delle calette vicine all\'aeroporto e goderti il tramonto con una cena a base di pesce fresco sul porto.',
+    hl: ['Volo diretto Roma–Ibiza', 'Arrivo pomeriggio', 'Prima cena al porto', 'Tramonto ibicenco'],
+    tip: 'Prenota il volo con 2-3 mesi di anticipo per i prezzi migliori. Ryanair e Vueling operano voli diretti da Fiumicino. Porta solo bagaglio a mano per risparmiare!',
+    maps: 'Aeroporto di Ibiza, Spain'
   },
   {
     id: 'ibiza',
@@ -762,9 +765,9 @@ const STOPS = [
     imgCaption: '📷 Cala Comte — acque multicolore di Ibiza',
     img: 'https://images.unsplash.com/photo-1606030221378-520b65dafd06?w=800&q=80',
     coords: [38.9542, 1.2316],
-    desc: `Ibiza non è solo vita notturna — l'isola nasconde alcune delle spiagge più spettacolari del Mediterraneo. Cala Comte regala acque multicolore che ricordano i Caraibi, mentre dall'isolotto di Es Vedrà si sprigiona un'energia quasi mistica. La sera, passeggia tra i vicoli di Dalt Vila, il centro storico UNESCO, con i suoi archi bianchi e panorami mozzafiato sul porto.`,
+    desc: 'Ibiza non è solo vita notturna — l\'isola nasconde alcune delle spiagge più spettacolari del Mediterraneo. Cala Comte regala acque multicolore che ricordano i Caraibi, mentre dall\'isolotto di Es Vedrà si sprigiona un\'energia quasi mistica. La sera, passeggia tra i vicoli di Dalt Vila, il centro storico UNESCO, con i suoi archi bianchi e panorami mozzafiato sul porto.',
     hl: ['Cala Comte', 'Cala Bassa', 'Es Vedrà', 'Dalt Vila (UNESCO)', 'Mercado Las Dalias'],
-    tip: 'Le aree sosta camper sono limitate — prenota in anticipo un campeggio o usa le aree autorizzate. Il campeggio libero è vietato e le multe sono molto salate!',
+    tip: 'Senza camper a Ibiza avrai più libertà! Noleggia uno scooter o un\'auto piccola per raggiungere le cale più remote. Prenota l\'alloggio con largo anticipo in estate.',
     maps: 'Cala Comte, Ibiza, Spain'
   },
   {
@@ -779,31 +782,31 @@ const STOPS = [
     imgCaption: '📷 Ses Illetes — tra le spiagge più belle d\'Europa',
     img: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80',
     coords: [38.7338, 1.4515],
-    desc: `Con il traghetto da Ibiza (35 min) si raggiunge Formentera, la più piccola e selvaggia delle Baleari. Ses Illetes è considerata una delle spiagge più belle d'Europa: acqua turchese trasparente, sabbia bianca finissima. Noleggiate una bici e percorrete l'isola tutta (solo 20km) per scoprire saline rosa, mulini a vento e calette nascoste.`,
+    desc: 'Con il traghetto da Ibiza (35 min) si raggiunge Formentera, la più piccola e selvaggia delle Baleari. Ses Illetes è considerata una delle spiagge più belle d\'Europa: acqua turchese trasparente, sabbia bianca finissima. Noleggiate una bici e percorrete l\'isola tutta (solo 20km) per scoprire saline rosa, mulini a vento e calette nascoste.',
     hl: ['Ses Illetes', 'Giro in bici', 'La Savina', 'Playa de Llevant', 'Faro de la Mola'],
-    tip: 'Lasciate il camper a Ibiza e andate a Formentera solo con il daypack — portare il camper richiede prenotazione con mesi di anticipo. Noleggiate una bici direttamente al porto.',
+    tip: 'Traghetto Ibiza-Formentera: 35 minuti, partenze frequenti da La Savina. Noleggiate bici direttamente al porto di Formentera — è il modo migliore per esplorare l\'isola!',
     maps: 'Ses Illetes, Formentera, Spain'
   },
   {
-    id: 'transfer',
-    days: 'Giorno 5',
-    name: 'Dénia → Andalusia',
-    emoji: '🚐',
-    category: 'trasferimento',
-    color: '#6366F1',
-    brief: 'Ritorno e partenza verso il profondo sud',
-    imgClass: 'bg-transfer',
-    imgCaption: '📷 L\'autovía del Mediterráneo verso l\'Andalusia',
-    img: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
-    coords: [37.9500, -1.1300],
-    desc: `Traghetto di ritorno a Dénia e subito in rotta verso l'Andalusia. Il viaggio sulla A-7 lungo la Costa Blanca offre scorci magnifici: le bianche scogliere di Alicante, le saline di Torrevieja rosa acceso, le campagne di Murcia. Si dorme a metà strada o si punta dritti verso Cabo de Gata.`,
-    hl: ['Traghetto di ritorno', 'Autovía del Mediterráneo', 'Costa Blanca', 'Saline di Torrevieja'],
-    tip: 'Fermati a fare rifornimento prima di Murcia — i prezzi sono leggermente più bassi. Attenzione alle ZTL nelle città costiere e porta sempre il disco orario.',
-    maps: 'Autopista A-7, Alicante, Spain'
+    id: 'valencia',
+    days: 'Giorni 5–6',
+    name: 'Valencia',
+    emoji: '🏙',
+    category: 'citta',
+    color: '#F97316',
+    brief: 'Ritiro camper e città delle arti e delle scienze',
+    imgClass: 'bg-valencia',
+    imgCaption: '📷 La Città delle Arti e delle Scienze — architettura futuristica',
+    img: 'https://images.unsplash.com/photo-1599209090928-b0db22f94a99?w=800&q=80',
+    coords: [39.4699, -0.3763],
+    desc: 'Da Ibiza si vola o si prende il traghetto per Valencia, la terza città della Spagna. Qui si ritira il camper e si ha un giorno intero per esplorare la spettacolare Città delle Arti e delle Scienze di Calatrava, il vivace Mercato Centrale, il quartiere storico del Carmen e la spiaggia della Malvarrosa. La paella valenciana è un rito obbligatorio!',
+    hl: ['Città delle Arti e delle Scienze', 'Mercato Centrale', 'Barrio del Carmen', 'Spiaggia Malvarrosa', 'Paella valenciana'],
+    tip: 'Per il camper: Indie Campers, Yescapa e McRent hanno sedi a Valencia. Ritira il camper la mattina del giorno 6 così hai il giorno 5 libero per visitare la città a piedi!',
+    maps: 'Ciudad de las Artes y las Ciencias, Valencia, Spain'
   },
   {
     id: 'cabodegata',
-    days: 'Giorni 6–7',
+    days: 'Giorno 7',
     name: 'Cabo de Gata-Níjar',
     emoji: '🌊',
     category: 'natura',
@@ -813,7 +816,7 @@ const STOPS = [
     imgCaption: '📷 Playa de Mónsul — set cinematografico di Indiana Jones',
     img: 'https://images.unsplash.com/photo-1467544805583-17f9038c1ee4?w=800&q=80',
     coords: [36.7644, -2.1306],
-    desc: `Il Parco Naturale di Cabo de Gata è il gioiello nascosto dell'Andalusia — un paesaggio vulcanico lunare dove scogliere nere incontrano l'acqua cristallina. Playa de los Genoveses è una falce di sabbia biondissima raggiungibile solo a piedi o in bici. Playa de Mónsul, con la sua duna di lava nera e il grande masso al centro, è cinematografica — ci ha girato Indiana Jones! L'area marina protetta rende lo snorkeling straordinario.`,
+    desc: 'Da Valencia si scende verso il sud lungo la costa — circa 5 ore di viaggio spettacolare. Il Parco Naturale di Cabo de Gata è un paesaggio vulcanico lunare dove scogliere nere incontrano l\'acqua cristallina. Playa de Mónsul, con la sua duna di lava nera, è cinematografica — ci ha girato Indiana Jones!',
     hl: ['Playa de los Genoveses', 'Playa de Mónsul', 'Arrecife de las Sirenas', 'San José', 'Snorkeling'],
     tip: 'Le strade per le spiagge del parco sono sterrate e tortuose. In estate arriva prima delle 9:00 per trovare parcheggio. Alcune strade potrebbero non essere adatte ai camper più grandi.',
     maps: 'Cabo de Gata-Nijar Natural Park, Spain'
@@ -830,14 +833,14 @@ const STOPS = [
     imgCaption: '📷 Canyon di Tabernas — il West nell\'Andalusia',
     img: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&q=80',
     coords: [37.0514, -2.3892],
-    desc: `Il Desierto de Tabernas è l'unico vero deserto d'Europa: badlands colorate, canyon che sembrano l'Arizona, silenzio assoluto. Sergio Leone ci ha girato "Per un pugno di dollari" e "Il buono, il brutto e il cattivo". Oggi puoi visitare i set cinematografici originali — Oasys Mini Hollywood è il più famoso — con show western e un piccolo zoo. Il trekking nei canyon al tramonto è un'esperienza indimenticabile.`,
+    desc: 'Il Desierto de Tabernas è l\'unico vero deserto d\'Europa: badlands colorate, canyon che sembrano l\'Arizona, silenzio assoluto. Sergio Leone ci ha girato "Per un pugno di dollari". Oggi puoi visitare i set cinematografici originali — Oasys Mini Hollywood è il più famoso — con show western e un piccolo zoo.',
     hl: ['Canyon di Tabernas', 'Oasys Mini Hollywood', 'Fort Bravo', 'Trekking al tramonto', 'Badlands'],
     tip: 'Evita il trekking nelle ore centrali (11–16): le temperature in estate superano i 40°C. Porta molta acqua, cappello e protezione solare. Ingresso Oasys circa 22€ a persona.',
     maps: 'Desierto de Tabernas, Almería, Spain'
   },
   {
     id: 'nerja',
-    days: 'Giorni 9–10',
+    days: 'Giorno 9',
     name: 'Nerja',
     emoji: '🏄',
     category: 'mare',
@@ -847,14 +850,14 @@ const STOPS = [
     imgCaption: '📷 Il Balcón de Europa — terrazza sospesa sul Mediterraneo',
     img: 'https://images.unsplash.com/photo-1482912308370-955c8b0c3b27?w=800&q=80',
     coords: [36.7440, -3.8769],
-    desc: `Nerja è la gemma nascosta della Costa del Sol — meno caotica di Málaga, più autentica di Marbella. Il Balcón de Europa, terrazza affacciata direttamente sul mare, è uno dei punti panoramici più romantici della Spagna. La Cueva de Nerja ospita le stalattiti più grandi del mondo. Ma la vera magia è Playa de Maro: pareti calcaree bianche, acqua verde smeraldo e kayak tra le grotte marine.`,
+    desc: 'Nerja è la gemma nascosta della Costa del Sol — meno caotica di Málaga, più autentica di Marbella. Il Balcón de Europa, terrazza affacciata sul mare, è uno dei punti panoramici più romantici della Spagna. La Cueva de Nerja ospita le stalattiti più grandi del mondo. La vera magia è Playa de Maro: pareti calcaree bianche, acqua verde smeraldo e kayak tra le grotte marine.',
     hl: ['Balcón de Europa', 'Playa de Maro', 'Kayak nelle grotte', 'Cueva de Nerja', 'Frigiliana'],
-    tip: 'Prenota la Cueva di Nerja online in anticipo — in alta stagione le file sono enormi. Il kayak si noleggia in spiaggia a Maro per circa 15€/ora. Frigiliana (pueblo blanco) è a 10 min di macchina.',
+    tip: 'Prenota la Cueva di Nerja online in anticipo — in alta stagione le file sono enormi. Il kayak si noleggia in spiaggia a Maro per circa 15€/ora.',
     maps: 'Nerja, Málaga, Spain'
   },
   {
     id: 'caminito',
-    days: 'Giorno 11',
+    days: 'Giorno 10',
     name: 'Caminito del Rey',
     emoji: '🧗',
     category: 'natura',
@@ -864,14 +867,14 @@ const STOPS = [
     imgCaption: '📷 La passerella sospesa a 700 metri di altezza',
     img: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80',
     coords: [36.9295, -4.7763],
-    desc: `Il Caminito del Rey è uno dei trekking più emozionanti d'Europa: una passerella sospesa sulle pareti verticali del canyon del Guadalhorce, a 700 metri d'altezza. Il sentiero (circa 8km) attraversa gallerie scavate nella roccia, ponti sospesi vertiginosi e pareti di calcare multicolore. Restaurato nel 2015, è oggi sicuro e attrezzato — ma non privo di forti emozioni.`,
+    desc: 'Il Caminito del Rey è uno dei trekking più emozionanti d\'Europa: una passerella sospesa sulle pareti verticali del canyon del Guadalhorce, a 700 metri d\'altezza. Il sentiero (circa 8km) attraversa gallerie scavate nella roccia, ponti sospesi vertiginosi e pareti di calcare multicolore.',
     hl: ['Passerella sospesa', 'Canyon Guadalhorce', 'El Chorro', 'Gallerie nella roccia', 'Lago di Ardales'],
-    tip: 'Prenotazione OBBLIGATORIA su caminitodelrey.info — si esaurisce settimane prima! Costo circa 10€ + shuttle. Porta scarpe da trekking con suola antiscivolo, non infradito.',
+    tip: 'Prenotazione OBBLIGATORIA su caminitodelrey.info — si esaurisce settimane prima! Costo circa 10€ + shuttle. Porta scarpe da trekking con suola antiscivolo.',
     maps: 'Caminito del Rey, Málaga, Spain'
   },
   {
     id: 'torcal',
-    days: 'Giorno 12',
+    days: 'Giorno 11',
     name: 'El Torcal de Antequera',
     emoji: '🪨',
     category: 'natura',
@@ -881,14 +884,14 @@ const STOPS = [
     imgCaption: '📷 Le formazioni carsiche del Torcal — 200 milioni di anni fa',
     img: 'https://images.unsplash.com/photo-1568476994182-3fb60a3cf51c?w=800&q=80',
     coords: [36.9549, -4.5428],
-    desc: `El Torcal è uno dei paesaggi più surreali della Penisola Iberica: enormi blocchi di calcare stratificato scolpiti da milioni di anni di erosione creano forme fantastiche — funghi, torri, labirinti di roccia. Il percorso verde (1,5 km, facile) attraversa il cuore del labirinto, mentre il percorso giallo (4,5 km) regala panorami sulla piana di Antequera.`,
+    desc: 'El Torcal è uno dei paesaggi più surreali della Penisola Iberica: enormi blocchi di calcare stratificato scolpiti da milioni di anni di erosione creano forme fantastiche — funghi, torri, labirinti di roccia. Il percorso verde (1,5 km, facile) attraversa il cuore del labirinto.',
     hl: ['Ruta Verde (1,5 km)', 'Ruta Amarilla (4,5 km)', 'Centro Visitatori', 'Dolmen di Menga (UNESCO)', 'Flora rupestre'],
-    tip: 'Il Centro Visitatori ha una mostra geologica gratuita. Arriva presto — il parcheggio è piccolo. Vicino c\'è il Dolmen di Menga, sito UNESCO preistorico: da non perdere assolutamente!',
+    tip: 'Il Centro Visitatori ha una mostra geologica gratuita. Arriva presto — il parcheggio è piccolo. Vicino c\'è il Dolmen di Menga, sito UNESCO preistorico.',
     maps: 'El Torcal de Antequera, Spain'
   },
   {
     id: 'tarifa',
-    days: 'Giorni 13–14',
+    days: 'Giorni 12–13',
     name: 'Tarifa',
     emoji: '🐋',
     category: 'mare',
@@ -898,14 +901,14 @@ const STOPS = [
     imgCaption: '📷 Playa de Bolonia — dune bianche e rovine romane',
     img: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=800&q=80',
     coords: [36.0127, -5.6015],
-    desc: `Tarifa è il punto più meridionale d'Europa e uno dei luoghi più speciali della Spagna. Qui l'Atlantico incontra il Mediterraneo e l'Europa guarda l'Africa a soli 14km. Le dune di Bolonia — bianchissime, alte 30 metri — avanzano verso le rovine romane di Baelo Claudia. Il whale watching nello Stretto di Gibilterra è tra i migliori al mondo: orche, capodogli e delfini passano durante le migrazioni.`,
+    desc: 'Tarifa è il punto più meridionale d\'Europa e uno dei luoghi più speciali della Spagna. Qui l\'Atlantico incontra il Mediterraneo e l\'Europa guarda l\'Africa a soli 14km. Le dune di Bolonia — bianchissime, alte 30 metri — avanzano verso le rovine romane di Baelo Claudia. Il whale watching nello Stretto di Gibilterra è tra i migliori al mondo.',
     hl: ['Playa de Bolonia', 'Dune di Bolonia', 'Baelo Claudia (I sec. a.C.)', 'Whale watching', 'Stretto di Gibilterra'],
-    tip: 'Il whale watching va prenotato con giorni di anticipo — cerca i tour certificati FIRMM o Turmares. La Playa de Los Lances è perfetta per il kitesurf, ma il vento levante può essere molto forte in giugno.',
+    tip: 'Il whale watching va prenotato con giorni di anticipo — cerca i tour certificati FIRMM o Turmares. La Playa de Los Lances è perfetta per il kitesurf.',
     maps: 'Tarifa, Cádiz, Spain'
   },
   {
     id: 'siviglia',
-    days: 'Giorno 15',
+    days: 'Giorno 14',
     name: 'Siviglia',
     emoji: '🏛',
     category: 'citta',
@@ -915,44 +918,55 @@ const STOPS = [
     imgCaption: '📷 Plaza de España — un semicerchio di azulejos e canali',
     img: 'https://images.unsplash.com/photo-1515443961218-a51367888e4b?w=800&q=80',
     coords: [37.3772, -5.9869],
-    desc: `Siviglia è la conclusione perfetta del viaggio — una città che esplode di colori, storia e flamenco. La Plaza de España, semicerchio barocco rivestito di azulejos e canali, è una delle piazze più belle d'Europa. Il Real Alcázar, palazzo arabo-cristiano ancora in uso, è patrimonio UNESCO. Il Barrio de Santa Cruz, ex quartiere ebraico, è un labirinto di vicoli profumati di arancio e gelsomino.`,
+    desc: 'Siviglia è la conclusione perfetta del giro andaluso — una città che esplode di colori, storia e flamenco. La Plaza de España, semicerchio barocco rivestito di azulejos e canali, è una delle piazze più belle d\'Europa. Il Real Alcázar, palazzo arabo-cristiano, è patrimonio UNESCO.',
     hl: ['Plaza de España', 'Real Alcázar (UNESCO)', 'Barrio de Santa Cruz', 'Catedral + Giralda', 'Torre del Oro'],
-    tip: 'L\'Alcázar richiede prenotazione online obbligatoria (alcazarsevilla.org). Per il camper usa il parcheggio Charco de la Pava (zona nord, lungo il fiume). Il tramonto dalla Torre del Oro è imperdibile.',
+    tip: 'L\'Alcázar richiede prenotazione online obbligatoria (alcazarsevilla.org). Per il camper usa il parcheggio Charco de la Pava (zona nord, lungo il fiume).',
     maps: 'Plaza de España, Sevilla, Spain'
+  },
+  {
+    id: 'ritorno',
+    days: 'Giorno 15',
+    name: 'Valencia → Roma',
+    emoji: '✈️',
+    category: 'volo',
+    color: '#8B5CF6',
+    brief: 'Riconsegna camper e volo di ritorno',
+    imgClass: 'bg-ritorno',
+    imgCaption: '📷 L\'ultimo tramonto spagnolo prima del ritorno',
+    img: 'https://images.unsplash.com/photo-1500835556837-99ac94a94552?w=800&q=80',
+    coords: [39.4893, -0.4816],
+    desc: 'Da Siviglia si risale verso Valencia — un viaggio di circa 6 ore lungo l\'autostrada A-4 e A-3, attraversando la Mancha. Si riconsegna il camper e si prende il volo di ritorno per Roma. Se il volo è nel pomeriggio, c\'è tempo per un\'ultima passeggiata nel centro storico e una paella d\'addio!',
+    hl: ['Riconsegna camper', 'Volo Valencia–Roma', 'Ultima paella!', 'Aeroporto di Valencia'],
+    tip: 'Riconsegna il camper almeno 3 ore prima del volo. Verifica le condizioni di riconsegna (pieno di benzina, pulizia interna). L\'aeroporto di Valencia è a soli 8 km dal centro.',
+    maps: 'Aeropuerto de Valencia, Spain'
   }
 ];
 
 const ACCORDION_DATA = [
   {
+    ico: '✈️',
+    title: 'Voli Roma–Ibiza e Valencia–Roma',
+    body: 'Voli diretti <strong>Roma Fiumicino → Ibiza</strong>: operati da Ryanair e Vueling, durata circa 2 ore. Prezzi da 30€ a 120€ a tratta prenotando con anticipo.<br><br>Voli diretti <strong>Valencia → Roma</strong>: operati da Ryanair e Vueling, durata circa 2 ore. Stesse fasce di prezzo.<br><br>Consiglio: prenota con 2-3 mesi di anticipo e viaggia con solo bagaglio a mano per risparmiare. Usa <strong>Skyscanner</strong> o <strong>Google Flights</strong> per confrontare i prezzi.'
+  },
+  {
     ico: '🚐',
-    title: 'Camper: aree sosta e consigli',
-    body: `In Spagna le aree di sosta (<em>áreas de autocaravanas</em>) sono ben diffuse, spesso gratuite o a basso costo (3–8€/notte). App indispensabili: <strong>Park4Night</strong>, <strong>Campercontact</strong>.<br><br>Evita la sosta selvaggia nelle aree protette e nei centri storici — le multe sono elevate. In alta stagione prenota in anticipo, specialmente nelle Baleari e in Andalusia costiera.<br><br>Camper fino a 7,5m e 3,5t non richiedono patente speciale in Spagna.`
+    title: 'Noleggio camper a Valencia',
+    body: 'I principali noleggi camper a Valencia:<br><br>• <strong>Indie Campers</strong>: flotta moderna, ritiro/riconsegna flessibile. Prezzi da 80-120€/giorno.<br>• <strong>Yescapa</strong>: noleggio tra privati, spesso più economico. Da 60-100€/giorno.<br>• <strong>McRent</strong>: agenzia internazionale, ampia scelta di veicoli.<br><br>Prenota con almeno 1-2 mesi di anticipo in alta stagione. Verifica: assicurazione kasko inclusa, km illimitati, condizioni di riconsegna.'
   },
   {
     ico: '⛴',
-    title: 'Traghetti Baleàrlia',
-    body: `La tratta <strong>Dénia–Ibiza</strong> è operata da Baleàrlia. Partenza serale (circa 22:30), arrivo mattina (circa 7:00).<br><br>Prezzi indicativi per camper fino a 6m + 2 persone (cabina inclusa): <strong>180–380€ A/R</strong> in base alla stagione e all'anticipo della prenotazione.<br><br>Prenotare su <strong>balearia.com</strong> almeno 4–6 settimane prima in alta stagione. Il traghetto Ibiza–Formentera dura 35 minuti (Trasmapi o Baleàrlia).`
+    title: 'Traghetti Ibiza–Valencia',
+    body: 'La tratta <strong>Ibiza–Valencia</strong> è operata da <strong>Trasmediterránea</strong> e <strong>Baleària</strong>. Durata: 4-6 ore (fast ferry) o 7-8 ore (traghetto standard).<br><br>Prezzi indicativi: <strong>40-90€ a persona</strong> (solo passeggero, senza veicolo).<br><br>Alternativa: volo Ibiza–Valencia con Vueling o Air Europa (~45 minuti, da 25€). Prenotare su <strong>balearia.com</strong> o <strong>trasmediterranea.es</strong>.'
   },
   {
     ico: '🎫',
     title: 'Prenotazioni obbligatorie',
-    body: `• <strong>Caminito del Rey:</strong> prenotazione obbligatoria su caminitodelrey.info. Disponibilità spesso esaurita 2–3 settimane prima.<br>• <strong>Cueva de Nerja:</strong> consigliata la prenotazione online su cuevadenerja.es.<br>• <strong>Real Alcázar Siviglia:</strong> obbligatoria su alcazarsevilla.org.<br>• <strong>Whale watching Tarifa:</strong> tour FIRMM o Turmares, posti limitati, prenota con almeno 3 giorni.<br>• <strong>Cabo de Gata (accesso auto):</strong> in estate accesso contingentato nelle prime ore del mattino.`
-  },
-  {
-    ico: '☀️',
-    title: 'Periodo migliore',
-    body: `✅ <strong>Maggio–Giugno:</strong> perfetto — caldo ma non torrido (22–28°C), spiagge ancora tranquille, prezzi ragionevoli, ottime luci fotografiche.<br><br>✅ <strong>Settembre–Ottobre:</strong> mare ancora caldo (22–25°C), folla diminuita, prezzi in calo del 30–40%.<br><br>⚠️ <strong>Luglio–Agosto:</strong> temperature estreme (35–45°C nel deserto), folla massima, prezzi al picco. Bello ma impegnativo.`
+    body: '• <strong>Caminito del Rey:</strong> prenotazione obbligatoria su caminitodelrey.info. Disponibilità spesso esaurita 2-3 settimane prima.<br>• <strong>Cueva de Nerja:</strong> consigliata la prenotazione online su cuevadenerja.es.<br>• <strong>Real Alcázar Siviglia:</strong> obbligatoria su alcazarsevilla.org.<br>• <strong>Whale watching Tarifa:</strong> tour FIRMM o Turmares, posti limitati, prenota con almeno 3 giorni.<br>• <strong>Città delle Arti Valencia:</strong> biglietto combinato online su cac.es per risparmiare.'
   },
   {
     ico: '💶',
     title: 'Budget stimato (2 persone)',
-    body: `<strong>Per 2 persone, 15 giorni:</strong><br><br>
-⛽ Carburante (~3.000 km): <strong>400–500€</strong><br>
-⛴ Traghetti A/R Dénia–Ibiza: <strong>250–380€</strong><br>
-🅿️ Aree sosta / campeggi: <strong>150–200€</strong><br>
-🎫 Ingressi (Caminito, Alcázar, Oasys, Cueva…): <strong>150–200€</strong><br>
-🛒 Alimentari + ristoranti: <strong>450–600€</strong><br><br>
-<strong>Totale stimato: 1.400–1.880€</strong> per 2 persone`
+    body: '<strong>Per 2 persone, 15 giorni:</strong><br><br>✈️ Voli A/R Roma–Ibiza + Valencia–Roma: <strong>200–400€</strong><br>⛴ Traghetto/volo Ibiza–Valencia: <strong>80–180€</strong><br>🚐 Noleggio camper 10 giorni: <strong>800–1.200€</strong><br>⛽ Carburante (~2.500 km): <strong>350–450€</strong><br>🏨 Alloggio Ibiza 4 notti: <strong>300–600€</strong><br>🅿️ Aree sosta / campeggi: <strong>100–150€</strong><br>🎫 Ingressi: <strong>150–200€</strong><br>🛒 Alimentari + ristoranti: <strong>450–600€</strong><br><br><strong>Totale stimato: 2.430–3.780€</strong> per 2 persone'
   }
 ];
 
@@ -1006,7 +1020,7 @@ function renderTimeline(filter = 'all') {
                  class="maps-btn" onclick="event.stopPropagation()">
                 🗺 Apri in Maps
               </a>
-              <a href="tappe/${stop.id}.html"
+              <a href="tappe/${stop.id}.html?from=alt"
                  class="detail-btn" style="background:${stop.color}"
                  onclick="event.stopPropagation()">
                 📖 Scopri di più →
@@ -1186,47 +1200,61 @@ function initMap() {
   const map = L.map('leaflet-map', {
     scrollWheelZoom: false,
     zoomControl: true
-  }).setView([37.5, -2.5], 6);
+  }).setView([37.5, -1.0], 6);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
     maxZoom: 18
   }).addTo(map);
 
-  const routeCoords = STOPS.map(s => s.coords);
-
-  // Draw route line
-  L.polyline(routeCoords, {
-    color: '#F59E0B',
-    weight: 3,
-    opacity: 0.8,
-    dashArray: '8, 8'
+  // Flight route (Roma → Ibiza)
+  const romaCoords = [41.8003, 12.2389];
+  L.polyline([romaCoords, STOPS[0].coords], {
+    color: '#8B5CF6', weight: 2, opacity: 0.6, dashArray: '4, 8'
   }).addTo(map);
 
-  // Add markers
+  // Ibiza ↔ Formentera ↔ Valencia
+  const balearicCoords = STOPS.slice(0, 4).map(s => s.coords);
+  L.polyline(balearicCoords, {
+    color: '#06B6D4', weight: 3, opacity: 0.7, dashArray: '6, 6'
+  }).addTo(map);
+
+  // Camper route (Valencia → south → Siviglia → Valencia)
+  const camperCoords = STOPS.slice(3).map(s => s.coords);
+  camperCoords.push([39.4699, -0.3763]); // Return to Valencia
+  L.polyline(camperCoords, {
+    color: '#F59E0B', weight: 3, opacity: 0.8, dashArray: '8, 8'
+  }).addTo(map);
+
+  // Return flight (Valencia → Roma)
+  L.polyline([[39.4893, -0.4816], romaCoords], {
+    color: '#8B5CF6', weight: 2, opacity: 0.6, dashArray: '4, 8'
+  }).addTo(map);
+
+  // Roma marker
+  const romaIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:26px;height:26px;border-radius:50%;background:#EF4444;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:12px;">🏠</div>',
+    iconSize: [26, 26], iconAnchor: [13, 13]
+  });
+  L.marker(romaCoords, { icon: romaIcon }).addTo(map)
+    .bindPopup('<strong>🏠 Roma</strong><br><span style="font-size:12px;color:#64748B">Partenza e ritorno</span>');
+
+  // Stop markers
   STOPS.forEach((stop, i) => {
     const icon = L.divIcon({
       className: '',
-      html: `<div style="
-        width:30px;height:30px;border-radius:50%;
-        background:${stop.color};border:3px solid white;
-        box-shadow:0 2px 8px rgba(0,0,0,.3);
-        display:flex;align-items:center;justify-content:center;
-        color:white;font-size:11px;font-weight:800;
-        font-family:'Outfit',sans-serif;
-      ">${i + 1}</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
+      html: '<div style="width:30px;height:30px;border-radius:50%;background:' + stop.color + ';border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;font-family:\'Outfit\',sans-serif;">' + (i + 1) + '</div>',
+      iconSize: [30, 30], iconAnchor: [15, 15]
     });
-
     L.marker(stop.coords, { icon })
       .addTo(map)
-      .bindPopup(`<strong>${stop.emoji} ${stop.name}</strong><br><span style="font-size:12px;color:#64748B">${stop.days} — ${stop.brief}</span>`);
+      .bindPopup('<strong>' + stop.emoji + ' ' + stop.name + '</strong><br><span style="font-size:12px;color:#64748B">' + stop.days + ' — ' + stop.brief + '</span>');
   });
 
-  // Fit bounds with padding
-  const group = L.featureGroup(STOPS.map(s => L.marker(s.coords)));
-  map.fitBounds(group.getBounds().pad(0.15));
+  const allCoords = [romaCoords, ...STOPS.map(s => s.coords)];
+  const group = L.featureGroup(allCoords.map(c => L.marker(c)));
+  map.fitBounds(group.getBounds().pad(0.1));
 }
 
 /* ======================================

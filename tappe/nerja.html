@@ -368,5 +368,13 @@
       .openPopup();
   </script>
 
+<script>
+  if (new URLSearchParams(window.location.search).get('from') === 'alt') {
+    const pn = document.querySelector('.prevnext');
+    if (pn) pn.innerHTML = '<a class="prev" href="tabernas.html?from=alt"><span class="prevnext-label">← Tappa precedente</span><span class="prevnext-name">🏜 Tabernas — Giorno 8</span></a><a class="next" href="caminito.html?from=alt"><span class="prevnext-label">Prossima tappa →</span><span class="prevnext-name">🧗 Caminito del Rey — Giorno 10</span></a>';
+    const tb = document.querySelector('.topbar a');
+    if (tb) tb.href = '../alternativo.html';
+  }
+</script>
 </body>
 </html>

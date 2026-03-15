@@ -358,5 +358,13 @@
     L.marker([37.3772, -5.9869]).addTo(map).bindPopup('<strong>Siviglia</strong><br>Capitale dell\'Andalusia');
   </script>
 
+<script>
+  if (new URLSearchParams(window.location.search).get('from') === 'alt') {
+    const pn = document.querySelector('.prevnext');
+    if (pn) pn.innerHTML = '<a class="prev" href="tarifa.html?from=alt"><span class="prevnext-label">← Tappa precedente</span><span class="prevnext-name">🐋 Tarifa — Giorni 12–13</span></a><a class="next" href="ritorno.html?from=alt"><span class="prevnext-label">Prossima tappa →</span><span class="prevnext-name">✈️ Valencia → Roma — Giorno 15</span></a>';
+    const tb = document.querySelector('.topbar a');
+    if (tb) tb.href = '../alternativo.html';
+  }
+</script>
 </body>
 </html>

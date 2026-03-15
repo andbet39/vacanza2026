@@ -342,5 +342,13 @@
       .openPopup();
   </script>
 
+<script>
+  if (new URLSearchParams(window.location.search).get('from') === 'alt') {
+    const pn = document.querySelector('.prevnext');
+    if (pn) pn.innerHTML = '<a class="prev" href="cabodegata.html?from=alt"><span class="prevnext-label">← Tappa precedente</span><span class="prevnext-name">🌊 Cabo de Gata — Giorno 7</span></a><a class="next" href="nerja.html?from=alt"><span class="prevnext-label">Prossima tappa →</span><span class="prevnext-name">🏄 Nerja — Giorno 9</span></a>';
+    const tb = document.querySelector('.topbar a');
+    if (tb) tb.href = '../alternativo.html';
+  }
+</script>
 </body>
 </html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Roma → Ibiza — Itinerario Alternativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2;
+      --cyan: #06B6D4;
+      --green: #22C55E;
+      --amber: #F59E0B;
+      --pink: #EC4899;
+      --purple: #6366F1;
+      --bg: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --tip-bg: #FFFBEB;
+      --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px;
+      --r-sm: 10px;
+      --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #8B5CF6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../alternativo.html">&larr; Itinerario</a>
+    <div class="topbar-title">Giorno 1</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #4C1D95, #8B5CF6, #C4B5FD)">
+    <span class="page-hero-cat">Volo</span>
+    <span class="page-hero-emoji">&plane;&#xFE0F;</span>
+    <div class="page-hero-day">Giorno 1</div>
+    <h1 class="page-hero-name">Roma &rarr; Ibiza</h1>
+    <p class="page-hero-brief">Volo diretto e primo assaggio dell'isola magica</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Volo diretto e primo assaggio dell'isola magica</div>
+    <div class="overview-text">
+      <p>Il viaggio inizia con un volo diretto da Roma Fiumicino a Ibiza, circa 2 ore sorvolando il Mediterraneo con vista spettacolare sulle Baleari. Diverse compagnie low-cost operano la tratta: Ryanair da Fiumicino e Ciampino, Vueling da Fiumicino. I prezzi variano da 30 a 120 euro a tratta se prenotati con anticipo.</p>
+      <p>L'atterraggio a Ibiza è emozionante — l'aeroporto è a pochi chilometri dalle prime spiagge e dal centro di Ibiza Town. Dall'alto si vedono le acque turchesi delle Baleari e la sagoma di Formentera all'orizzonte. Appena atterrati, il caldo mediterraneo e il profumo di pini marittimi vi accolgono.</p>
+      <p>Il primo pomeriggio è perfetto per ambientarsi: raggiungete l'alloggio, fate un primo tuffo in una delle calette vicine (Cala Talamanca o Figueretas sono le più accessibili dall'aeroporto), e chiudete la giornata con una cena di pesce fresco al porto di Ibiza Town guardando il tramonto.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Le attrazioni del primo giorno a Ibiza</div>
+
+    <div class="card">
+      <div class="card-title">🏖 Cala Talamanca</div>
+      <div class="card-text">Spiaggia facilmente raggiungibile dall'aeroporto, acqua calma e poco profonda, ideale per il primo bagno. Bar e ristoranti sulla spiaggia.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuita</span>
+        <span class="card-meta-item">🚗 5 min dall'aeroporto</span>
+        <span class="card-meta-item">🏊 Acqua calma</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛵ Porto di Ibiza</div>
+      <div class="card-text">Il porto vecchio è il cuore pulsante della città. Barche di pescatori, yacht, ristoranti di pesce e vista su Dalt Vila illuminata. Perfetto per la prima cena ibicenca.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🍽 Ristoranti</span>
+        <span class="card-meta-item">🌅 Tramonto</span>
+        <span class="card-meta-item">🚶 Passeggiata serale</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏰 Dalt Vila (primo sguardo)</div>
+      <div class="card-text">Le mura UNESCO della città vecchia sono visibili dal porto. Una breve passeggiata serale fino al Portal de Ses Taules vi da un assaggio di quello che esplorerete nei giorni successivi.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏛 UNESCO</span>
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">📸 Panorama</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Playa de Figueretas</div>
+      <div class="card-text">Spiaggia urbana a 10 minuti dall'aeroporto, comoda e attrezzata. Vista sulla città vecchia di Ibiza, perfetta se cercate una spiaggia con tutti i servizi.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏙 Urbana</span>
+        <span class="card-meta-item">🍹 Bar</span>
+        <span class="card-meta-item">🅿️ Parcheggio vicino</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛒 Supermercato Eroski/Mercadona</div>
+      <div class="card-text">Fare la spesa appena arrivati è strategico: acqua, frutta, crema solare e snack per i giorni successivi. Supermercati sulla strada dall'aeroporto alla città.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🛒 Spesa</span>
+        <span class="card-meta-item">💰 Prezzi accessibili</span>
+        <span class="card-meta-item">🕐 Aperto fino alle 21</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Consigli per il viaggio e l'arrivo a Ibiza</div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">✈️ Volo Roma–Ibiza</div>
+        <div class="card-text">Ryanair e Vueling operano voli diretti tutto l'anno. Durata: ~2h. Da Fiumicino (FCO) e Ciampino (CIA). Prezzi: 30-120€ a tratta prenotando 2-3 mesi prima.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Dall'Aeroporto</div>
+        <div class="card-text">L'aeroporto di Ibiza (IBZ) è a 7 km dal centro. Bus linea 10 (3.50€), taxi (~15-20€), noleggio auto/scooter disponibile in aeroporto.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏨 Dove Dormire</div>
+        <div class="card-text">Senza camper a Ibiza, le opzioni sono hotel, B&B, appartamenti su Airbnb o ostelli. Zona Ibiza Town o Playa d'en Bossa per comodità. Prenotare con anticipo in estate!</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">25-32°C in estate, sempre ventilato dalla brezza marina. Protezione solare obbligatoria. Acqua del mare 24-27°C in estate.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tip Box -->
+  <div class="section">
+    <div class="tip-box">
+      <span class="tip-ico">⚠️</span>
+      <span class="tip-text">Prenotate il volo con almeno 2-3 mesi di anticipo per i prezzi migliori. Viaggiate con bagaglio a mano per risparmiare — tanto a Ibiza si vive in costume! Scaricate l'app della compagnia aerea per il check-in online.</span>
+    </div>
+  </div>
+
+  <!-- Dove Alloggiare -->
+  <div class="section">
+    <h2 class="section-title">🏨 Dove Alloggiare</h2>
+    <div class="section-sub">Opzioni per le notti a Ibiza</div>
+
+    <div class="card">
+      <div class="card-title">🏨 Hotel/B&B Ibiza Town</div>
+      <div class="card-text">La zona più comoda per esplorare: vicino al porto, Dalt Vila e ristoranti. Prezzi: 80-200€/notte in estate. Prenotare con largo anticipo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 80-200€/notte</span>
+        <span class="card-meta-item">📍 Centro</span>
+        <span class="card-meta-item">🔥 Prenotare presto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏠 Airbnb/Appartamenti</div>
+      <div class="card-text">Soluzione ideale per risparmiare e avere una cucina. Zona San Antonio o Santa Eulalia per un'atmosfera più tranquilla. Prezzi: 60-150€/notte.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 60-150€/notte</span>
+        <span class="card-meta-item">🍳 Cucina</span>
+        <span class="card-meta-item">🏖 Fuori centro</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛏 Ostelli</div>
+      <div class="card-text">Per chi viaggia con budget ridotto. Hostel Giramundo e Amistat Island Hostel sono tra i migliori dell'isola. Dormitori da 25-45€/notte.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 25-45€/notte</span>
+        <span class="card-meta-item">👥 Sociale</span>
+        <span class="card-meta-item">🎉 Atmosfera</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare il viaggio a Ibiza</div>
+
+    <a class="link-item" href="https://www.skyscanner.it/voli/rome/ibiza/" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">✈️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Skyscanner - Confronta voli Roma-Ibiza</div>
+        <div class="link-item-url">skyscanner.it</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.ibiza.travel/it/" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏝</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Turismo Ibiza - Sito ufficiale del turismo</div>
+        <div class="link-item-url">ibiza.travel</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://ibizabus.com" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🚌</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Bus Aeroporto Ibiza - Orari e linee</div>
+        <div class="link-item-url">ibizabus.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://www.booking.com/city/es/ibiza.html" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🏨</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Booking.com Ibiza - Alloggi a Ibiza</div>
+        <div class="link-item-url">booking.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://park4night.com/it/search?lat=38.91&lng=1.42" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Ibiza - Aree sosta</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a class="link-item" href="https://maps.google.com/?q=Aeroporto+di+Ibiza" target="_blank" rel="noopener noreferrer">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps - Mappa</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Map -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione dell'Aeroporto di Ibiza</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a class="prev" href="../alternativo.html">
+      <span class="prevnext-label">&larr; Itinerario</span>
+      <span class="prevnext-name">Torna all'itinerario completo</span>
+    </a>
+    <a class="next" href="ibiza.html?from=alt">
+      <span class="prevnext-label">Prossima tappa &rarr;</span>
+      <span class="prevnext-name">🏝 Ibiza — Giorni 2–3</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    ✈️🚐 Roma → Ibiza → Sud della Spagna — Arrivo Ibiza
+  </div>
+
+  <script>
+    var map = L.map('detail-map', { scrollWheelZoom: false }).setView([38.8729, 1.3731], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+    }).addTo(map);
+    L.marker([38.8729, 1.3731]).addTo(map)
+      .bindPopup('<strong>✈️ Aeroporto di Ibiza (IBZ)</strong>')
+      .openPopup();
+  </script>
+
+</body>
+</html>

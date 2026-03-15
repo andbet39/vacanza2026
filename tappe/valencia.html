@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Valencia — 15 Giorni nel Sud della Spagna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #0891B2; --cyan: #06B6D4; --green: #22C55E; --amber: #F59E0B;
+      --pink: #EC4899; --purple: #6366F1; --bg: #FFF7ED; --bg-card: #FFFFFF;
+      --text: #1E293B; --text-muted: #64748B; --text-light: #94A3B8; --border: #E2E8F0;
+      --tip-bg: #FFFBEB; --tip-border: #F59E0B;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.07); --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+      --r: 16px; --r-sm: 10px; --r-full: 999px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-color: #F97316;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A; --bg-card: #1E293B; --text: #F1F5F9;
+        --text-muted: #94A3B8; --text-light: #475569; --border: #334155;
+        --tip-bg: #1C1607; --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { position:sticky; top:0; z-index:100; background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-sm); }
+    .topbar a { display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--page-color); }
+    .topbar-title { flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); }
+
+    .page-hero { position:relative; padding:48px 24px 32px; text-align:center; overflow:hidden; }
+    .page-hero-emoji { font-size:56px; margin-bottom:12px; display:block; }
+    .page-hero-day { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.7); margin-bottom:6px; }
+    .page-hero-name { font-size:34px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:6px; }
+    .page-hero-brief { font-size:15px; color:rgba(255,255,255,.8); font-weight:500; }
+    .page-hero-cat { display:inline-block; background:rgba(255,255,255,.2); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:var(--r-full); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    .section { padding:24px 20px; }
+    .section + .section { border-top:1px solid var(--border); }
+    .section-title { font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:13px; color:var(--text-muted); margin-bottom:16px; }
+
+    .overview-text { font-size:14.5px; line-height:1.75; color:var(--text-muted); }
+    .overview-text p { margin-bottom:14px; }
+
+    .card { background:var(--bg-card); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+    .card-title { font-size:16px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .card-text { font-size:13.5px; line-height:1.6; color:var(--text-muted); }
+    .card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .card-meta-item { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-light); background:var(--bg); padding:4px 10px; border-radius:var(--r-full); }
+
+    .info-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:500px) { .info-grid { grid-template-columns:1fr 1fr; } }
+
+    .link-item { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--bg-card); border-radius:var(--r-sm); border:1px solid var(--border); margin-bottom:8px; transition:transform .15s; }
+    .link-item:active { transform:scale(.98); }
+    .link-item-icon { font-size:20px; flex-shrink:0; }
+    .link-item-text { flex:1; min-width:0; }
+    .link-item-name { font-size:14px; font-weight:700; }
+    .link-item-url { font-size:11px; color:var(--text-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-item-arrow { color:var(--text-light); font-size:16px; }
+
+    .tip-box { background:var(--tip-bg); border:1.5px solid var(--tip-border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+    .tip-ico { font-size:18px; flex-shrink:0; }
+    .tip-text { font-size:13px; line-height:1.5; font-weight:500; }
+
+    .map-container { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); }
+    #detail-map { width:100%; height:300px; }
+
+    .prevnext { display:flex; gap:12px; padding:24px 20px; border-top:1px solid var(--border); }
+    .prevnext a { flex:1; display:flex; flex-direction:column; gap:2px; padding:14px 16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .prevnext a:active { transform:scale(.98); }
+    .prevnext-label { font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .prevnext-name { font-size:14px; font-weight:700; }
+    .prevnext .next { text-align:right; }
+
+    .page-footer { text-align:center; padding:24px 20px 32px; color:var(--text-light); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../alternativo.html">← Itinerario</a>
+    <div class="topbar-title">Giorni 5–6</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="page-hero" style="background:linear-gradient(135deg, #9A3412, #F97316, #FED7AA)">
+    <span class="page-hero-cat">Città</span>
+    <span class="page-hero-emoji">🏙</span>
+    <div class="page-hero-day">Giorni 5–6</div>
+    <h1 class="page-hero-name">Valencia</h1>
+    <p class="page-hero-brief">Città delle Arti, paella e ritiro del camper</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <h2 class="section-title">📍 Panoramica</h2>
+    <div class="section-sub">Architettura futuristica, gastronomia e inizio dell'avventura in camper</div>
+    <div class="overview-text">
+      <p>Da Ibiza si raggiunge Valencia in traghetto (4-6 ore con Baleària o Trasmediterránea) oppure con un breve volo interno di circa 45 minuti. Valencia, la terza città della Spagna, è una sorpresa continua: un mix perfetto di storia medievale, architettura futuristica e cultura gastronomica che la rende una delle città più vivibili d'Europa.</p>
+      <p>La Città delle Arti e delle Scienze, progettata da Santiago Calatrava, è un complesso architettonico avveniristico che sembra uscito da un film di fantascienza. L'Oceanogràfic è il più grande acquario d'Europa, l'Hemisfèric un cinema IMAX a forma di occhio umano, e il Museo delle Scienze è un'esperienza interattiva straordinaria. Di notte, le strutture illuminate si riflettono nelle vasche d'acqua creando uno spettacolo magico.</p>
+      <p>Il centro storico di Valencia è altrettanto affascinante: il Mercato Centrale, uno dei più grandi e belli d'Europa, è un tripudio di colori, profumi e sapori. Il Barrio del Carmen, quartiere bohémien pieno di street art, locali e negozi indipendenti, è il cuore della movida valenciana. La Cattedrale custodisce quello che molti credono essere il Santo Graal.</p>
+      <p>E poi c'è la paella — Valencia ne è la patria e qui si mangia quella autentica, cotta sulla legna con ingredienti locali. La spiaggia della Malvarrosa offre un lungomare perfetto per una passeggiata serale prima di ritirare il camper e partire verso sud.</p>
+    </div>
+  </div>
+
+  <!-- Cosa Vedere -->
+  <div class="section">
+    <h2 class="section-title">🏛 Cosa Vedere</h2>
+    <div class="section-sub">Architettura, mercati, spiagge e paella autentica</div>
+
+    <div class="card">
+      <div class="card-title">🏛 Città delle Arti e delle Scienze</div>
+      <div class="card-text">Complesso architettonico futuristico di Calatrava. Include l'Oceanogràfic (acquario), l'Hemisfèric (cinema IMAX), il Museo delle Scienze e il Palau de les Arts. Una giornata intera per visitarlo tutto.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Biglietto combinato ~37€</span>
+        <span class="card-meta-item">⏱ Giornata intera</span>
+        <span class="card-meta-item">📸 Imperdibile</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏪 Mercato Centrale</div>
+      <div class="card-text">Uno dei più grandi mercati alimentari d'Europa, ospitato in un edificio modernista del 1928. Oltre 1.000 bancarelle di frutta, verdura, pesce, carne, spezie e prodotti tipici. Perfetto per fare colazione o pranzo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🕐 Lun-Sab 7:30-15:00</span>
+        <span class="card-meta-item">💰 Gratuito (ingresso)</span>
+        <span class="card-meta-item">🍊 Prodotti locali</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎨 Barrio del Carmen</div>
+      <div class="card-text">Il quartiere più antico e vivace di Valencia. Stradine medievali piene di street art, locali alternativi, gallerie d'arte e botteghe artigiane. Di giorno cultura, di sera movida.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🎨 Street art</span>
+        <span class="card-meta-item">🍺 Locali</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🥘 Paella Valenciana</div>
+      <div class="card-text">La paella è nata qui e va mangiata qui! I ristoranti migliori sono nella zona di El Palmar (Albufera) o sul lungomare della Malvarrosa. La paella autentica valenciana è con pollo, coniglio e verdure — non di pesce!</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 15-25€ a persona</span>
+        <span class="card-meta-item">🍳 Cotta a legna</span>
+        <span class="card-meta-item">🌾 Ricetta originale</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏖 Spiaggia della Malvarrosa</div>
+      <div class="card-text">Il lungomare di Valencia: ampia spiaggia di sabbia, paseo marítimo con ristoranti e chiringuitos. Perfetta per un bagno rinfrescante e una passeggiata al tramonto prima di partire.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">🏖 Sabbia fine</span>
+        <span class="card-meta-item">🍹 Chiringuitos</span>
+        <span class="card-meta-item">🌅 Tramonto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⛪ Cattedrale e Santo Graal</div>
+      <div class="card-text">La Cattedrale di Valencia mescola stili romanico, gotico e barocco. Custodisce una coppa che la tradizione identifica come il Santo Graal. Il Miguelete, il campanile, offre una vista panoramica sulla città.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 ~8€</span>
+        <span class="card-meta-item">⏱ 1h</span>
+        <span class="card-meta-item">🔔 Salire sul Miguelete</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌿 Giardini del Turia</div>
+      <div class="card-text">Il vecchio letto del fiume Turia è stato trasformato nel più grande parco urbano della Spagna: 9 km di giardini, piste ciclabili, aree gioco e campi sportivi. Percorrerlo in bici è un'esperienza unica.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🚲 Noleggio bici</span>
+        <span class="card-meta-item">📏 9 km</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Pratiche -->
+  <div class="section">
+    <h2 class="section-title">ℹ️ Info Pratiche</h2>
+    <div class="section-sub">Tutto quello che serve per organizzare la visita</div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">⛴ Da Ibiza a Valencia</div>
+        <div class="card-text">Traghetto Baleària/Trasmediterránea: 4-6h, da 40€/persona. Oppure volo Vueling/Air Europa: ~45 min, da 25€. Prenotare su balearia.com o trasmediterranea.es.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚐 Ritiro Camper</div>
+        <div class="card-text">Indie Campers (indiecampers.com), Yescapa (yescapa.it), McRent (mcrent.eu). Sedi a Valencia città e aeroporto. Ritiro consigliato al mattino del giorno 6.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🅿️ Parcheggio</div>
+        <div class="card-text">Zona blu in centro (1-2€/h). Parcheggio gratuito lungo la spiaggia Malvarrosa. Zona Ciutat de les Arts gratuita nei weekend. Per il camper: Area sosta Valencia Port.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Clima</div>
+        <div class="card-text">25-34°C in estate. Umidità moderata, brezza costante dal mare. Piogge rare in estate ma possibili temporali brevi in settembre. Protezione solare consigliata.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-ico">💡</span>
+      <div class="tip-text">Valencia è perfetta per essere visitata a piedi o in bici! Scaricate l'app Valenbisi per il bike sharing (prima mezz'ora gratuita). Per la paella, evitate i ristoranti turistici del centro — andate a El Palmar nella zona dell'Albufera per quella autentica.</div>
+    </div>
+  </div>
+
+  <!-- Dove Sostare col Camper -->
+  <div class="section">
+    <h2 class="section-title">🚐 Dove Sostare col Camper</h2>
+    <div class="section-sub">Campeggi e aree sosta nella zona</div>
+
+    <div class="tip-box">
+      <span class="tip-ico">⚠️</span>
+      <div class="tip-text">Il camper si ritira a Valencia, quindi per le prime notti (giorni 1-4 a Ibiza) sarete senza. Cercate alloggio a Ibiza prima del viaggio! Una volta con il camper, usate le aree sosta e i campeggi.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Area Sosta Valencia Port</div>
+      <div class="card-text">Area attrezzata per camper vicino al porto. Servizi: acqua, scarico, elettricità. Posizione comoda per visitare il centro in bus o a piedi.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 12-18€/notte</span>
+        <span class="card-meta-item">🔌 Servizi completi</span>
+        <span class="card-meta-item">🚌 Bus per centro</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏕 Camping Coll Vert (Albufera)</div>
+      <div class="card-text">Campeggio nella zona del parco naturale dell'Albufera, a 15 minuti dal centro. Piscina, ristorante, accesso alla spiaggia El Saler. Ambiente tranquillo.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 25-35€/notte</span>
+        <span class="card-meta-item">🏊 Piscina</span>
+        <span class="card-meta-item">🌿 Natura</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🅿️ Parcheggio Malvarrosa</div>
+      <div class="card-text">Grande area parcheggio lungo la spiaggia. Tollerata la sosta camper per una notte. Nessun servizio, ma posizione perfetta per godersi il mare.</div>
+      <div class="card-meta">
+        <span class="card-meta-item">💰 Gratuito</span>
+        <span class="card-meta-item">🏖 Sulla spiaggia</span>
+        <span class="card-meta-item">⚠️ Servizi assenti</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Utili -->
+  <div class="section">
+    <h2 class="section-title">🔗 Link Utili</h2>
+    <div class="section-sub">Risorse per organizzare la visita</div>
+
+    <a href="https://www.visitvalencia.com/it" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏛</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Visit Valencia - Sito turistico ufficiale</div>
+        <div class="link-item-url">visitvalencia.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.cac.es/en/home" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🏙</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Città delle Arti e Scienze - Biglietti</div>
+        <div class="link-item-url">cac.es</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://www.balearia.com" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">⛴</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Baleària Traghetti - Ibiza-Valencia</div>
+        <div class="link-item-url">balearia.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://indiecampers.com/it" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🚐</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Indie Campers - Noleggio camper</div>
+        <div class="link-item-url">indiecampers.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://park4night.com/it/search?lat=39.47&lng=-0.38" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🅿️</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Park4Night Valencia - Aree sosta</div>
+        <div class="link-item-url">park4night.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+
+    <a href="https://maps.google.com/?q=Valencia,+Spain" target="_blank" rel="noopener noreferrer" class="link-item">
+      <span class="link-item-icon">🗺</span>
+      <div class="link-item-text">
+        <div class="link-item-name">Google Maps - Mappa</div>
+        <div class="link-item-url">maps.google.com</div>
+      </div>
+      <span class="link-item-arrow">›</span>
+    </a>
+  </div>
+
+  <!-- Mappa -->
+  <div class="section">
+    <h2 class="section-title">🗺 Mappa</h2>
+    <div class="section-sub">Posizione di Valencia</div>
+    <div class="map-container">
+      <div id="detail-map"></div>
+    </div>
+  </div>
+
+  <!-- Prev/Next -->
+  <div class="prevnext">
+    <a href="formentera.html?from=alt">
+      <span class="prevnext-label">← Tappa precedente</span>
+      <span class="prevnext-name">🚲 Formentera — Giorno 4</span>
+    </a>
+    <a href="cabodegata.html?from=alt" class="next">
+      <span class="prevnext-label">Prossima tappa →</span>
+      <span class="prevnext-name">🌊 Cabo de Gata — Giorno 7</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    ✈️🚐 Roma → Ibiza → Sud della Spagna — Valencia
+  </div>
+
+  <script>
+    const map = L.map('detail-map', { scrollWheelZoom: false }).setView([39.4699, -0.3763], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([39.4699, -0.3763]).addTo(map).bindPopup('<strong>Valencia</strong><br>Città delle Arti e delle Scienze');
+  </script>
+
+</body>
+</html>

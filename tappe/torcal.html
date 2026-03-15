@@ -338,5 +338,13 @@
     L.marker([36.9549, -4.5428]).addTo(map).bindPopup('<strong>El Torcal de Antequera</strong><br>Parco naturale carsico');
   </script>
 
+<script>
+  if (new URLSearchParams(window.location.search).get('from') === 'alt') {
+    const pn = document.querySelector('.prevnext');
+    if (pn) pn.innerHTML = '<a class="prev" href="caminito.html?from=alt"><span class="prevnext-label">← Tappa precedente</span><span class="prevnext-name">🧗 Caminito del Rey — Giorno 10</span></a><a class="next" href="tarifa.html?from=alt"><span class="prevnext-label">Prossima tappa →</span><span class="prevnext-name">🐋 Tarifa — Giorni 12–13</span></a>';
+    const tb = document.querySelector('.topbar a');
+    if (tb) tb.href = '../alternativo.html';
+  }
+</script>
 </body>
 </html>
